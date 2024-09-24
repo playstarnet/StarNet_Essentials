@@ -20,11 +20,14 @@ public class DisplayNameUtil {
     }
 
     public static String nameFromChatMessage(String chatMessage) {
-        String username = chatMessage.split(" ")[1];
-        username = username.replaceAll("^\\S+ ", "");
-        if (username.isEmpty()) {
-            return "";
-        } else return username;
+        String[] message = chatMessage.split(" ");
+        if (message.length > 1) {
+            String username = chatMessage.split(" ")[1];
+            username = username.replaceAll("^\\S+ ", "");
+            if (username.isEmpty()) {
+                return "";
+            } else return username;
+        } else return chatMessage;
     }
 
     public static MutableComponent withBadges(MutableComponent text, String playerName, boolean tooltip) throws Exception {

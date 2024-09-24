@@ -10,8 +10,8 @@
     "Dragonostic"
   ],
   "contact": {
-    "homepage": "https://github.com/OliviaTheVampire/StarNet+",
-    "sources": "https://discord.gg/UktczTSdB4"
+    "homepage": "https://github.com/playstarnet/StarNet_Essentials",
+    "sources": "https://linktr.ee/playstarnet"
   },
   "license": "MIT",
   "icon": "assets/starnet_essentials/icon.png",
@@ -30,7 +30,7 @@
   ],
   "depends": {
     "fabricloader": ">=0.16.4",
-    "minecraft": ">=1.21.1"
+    "minecraft": ">=1.21"
   },
   "breaks": {
     "optifabric": "*"
