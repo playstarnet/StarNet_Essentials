@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "starnet_essentials",
+  "version": "${version}",
+  "name": "StarNet Essentials",
+  "description": "Quality-of-life mod made to make the StarNet experience better.",
+  "authors": [
+    "ella",
+    "OliviaTheVampire",
+    "Dragonostic"
+  ],
+  "contact": {
+    "homepage": "https://github.com/OliviaTheVampire/StarNet+",
+    "sources": "https://discord.gg/UktczTSdB4"
+  },
+  "license": "MIT",
+  "icon": "assets/starnet_essentials/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.playstarnet.essentials.StarNetEssentials"
+    ],
+    "modmenu": [
+      "com.playstarnet.essentials.feat.config.ModMenuImplementation"
+    ]
+  },
+  "accessWidener": "starnet_essentials.accesswidener",
+  "mixins": [
+    "starnet_essentials.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.4",
+    "minecraft": ">=1.21.1"
+  },
+  "breaks": {
+    "optifabric": "*"
+  }
+}

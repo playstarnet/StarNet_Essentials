@@ -1,0 +1,25 @@
+{
+    "categories.se": "StarNet Essentials",
+
+    "key.se.menu": "Open StarNet Essentials Menu",
+    "key.se.wardrobe": "Open Wardrobe",
+    "key.se.profile": "Open Profile",
+    "key.se.mail": "Open Mail",
+    "key.se.map": "Open Map",
+    "key.se.island": "Go to Island",
+    "key.se.spawn": "Go to Spawn",
+    "key.se.settings": "Open StarNet Settings",
+
+    "tooltip.se.friend": "Friend :)",
+    "tooltip.se.user": "StarNet Essentials User",
+    "tooltip.se.translator": "StarNet Essentials Translator",
+    "tooltip.se.teamMember": "StarNet Essentials Team Member",
+    "tooltip.se.developer": "StarNet Essentials Developer",
+
+    "config.se.general.title": "General",
+
+    "config.se.general.hide_cosmetics": "Hide Cosmetics",
+    "config.se.general.discord_rpc": "DiscordRPC",
+    "config.se.general.xp_percent": "Experience %",
+    "config.se.general.inventory_rarities": "Inventory Rarities"
+}
