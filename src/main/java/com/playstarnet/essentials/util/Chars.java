@@ -21,17 +21,17 @@ public enum Chars {
     DEV (
         "\uE003",
         "tooltip.se.developer",
-        ChatFormatting.YELLOW
+        ChatFormatting.DARK_PURPLE
     ),
     TRANSLATOR (
         "\uE004",
         "tooltip.se.translator",
-        ChatFormatting.GREEN
+        ChatFormatting.RED
     ),
     TEAM (
         "\uE005",
         "tooltip.se.teamMember",
-        ChatFormatting.LIGHT_PURPLE
+        ChatFormatting.GREEN
     ),
     SETTINGS (
         "\uEF01",

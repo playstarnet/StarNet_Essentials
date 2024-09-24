@@ -1,5 +1,7 @@
 package com.playstarnet.essentials.mixins;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.playstarnet.essentials.StarNetEssentials;
 import com.playstarnet.essentials.feat.config.model.GeneralConfigModel;
@@ -11,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -22,6 +25,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -98,5 +102,29 @@ public abstract class InGameHudMixin implements InGameHudAccessor {
     @Override
     public int se$getExperienceLevel() {
         return this.minecraft.player.experienceLevel;
+    }
+
+    @Shadow protected abstract void renderSleepOverlay(GuiGraphics context, DeltaTracker tickCounter);
+
+    @Shadow protected abstract void renderTitle(GuiGraphics context, DeltaTracker tickCounter);
+
+    @Definition(id = "add", method = "Lnet/minecraft/client/gui/LayeredDraw;add(Lnet/minecraft/client/gui/LayeredDraw$Layer;)Lnet/minecraft/client/gui/LayeredDraw;")
+    @Definition(id = "renderTitle", method = "Lnet/minecraft/client/gui/Gui;renderTitle(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V")
+    @Expression("?.add(this::renderTitle)")
+    @ModifyArg(method = "<init>", at = @At("MIXINEXTRAS:EXPRESSION"))
+    private LayeredDraw.Layer init2(LayeredDraw.Layer original) {
+        return (context, tickCounter) -> {};
+    }
+
+    @Definition(id = "add", method = "Lnet/minecraft/client/gui/LayeredDraw;add(Lnet/minecraft/client/gui/LayeredDraw$Layer;)Lnet/minecraft/client/gui/LayeredDraw;")
+    @Definition(id = "renderTitle", method = "Lnet/minecraft/client/gui/Gui;renderTitle(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V")
+    @Definition(id = "renderSleepOverlay", method = "Lnet/minecraft/client/gui/Gui;renderSleepOverlay(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/client/DeltaTracker;)V")
+    @Expression("?.add(this::renderSleepOverlay)")
+    @ModifyArg(method = "<init>", at = @At("MIXINEXTRAS:EXPRESSION"))
+    private LayeredDraw.Layer init3(LayeredDraw.Layer original) {
+        return (context, tickCounter) -> {
+            renderTitle(context, tickCounter);
+            renderSleepOverlay(context, tickCounter);
+        };
     }
 }

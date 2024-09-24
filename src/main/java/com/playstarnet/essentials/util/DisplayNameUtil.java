@@ -1,9 +1,11 @@
 package com.playstarnet.essentials.util;
 
+import com.playstarnet.essentials.GitHubJsonFetcher;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,30 +20,41 @@ public class DisplayNameUtil {
     }
 
     public static String nameFromChatMessage(String chatMessage) {
-        String username = chatMessage.replaceAll(":(.*)", "");
+        String username = chatMessage.split(" ")[1];
         username = username.replaceAll("^\\S+ ", "");
         if (username.isEmpty()) {
             return "";
         } else return username;
     }
 
-    public static MutableComponent withBadges(MutableComponent text, String playerName, boolean tooltip) {
+    public static MutableComponent withBadges(MutableComponent text, String playerName, boolean tooltip) throws Exception {
         String playerID = "";
         MutableComponent newComponent = Component.empty();
 
-        for (Map.Entry<String, String> entry : StaticValues.users.entrySet()) {
-            if (entry.getValue().equals(playerName)) {
-                playerID = entry.getKey();
+        if (!playerName.isEmpty()) {
+            String jsonUrl = "https://raw.githubusercontent.com/playstarnet/StarNet_Essentials/refs/heads/main/users.json";
+            String jsonString = GitHubJsonFetcher.fetchJsonFromGitHub(jsonUrl);
+
+            Map<String, String> users = GitHubJsonFetcher.parseJsonToUserMap(jsonString);
+            Set<String> friends = GitHubJsonFetcher.parseJsonToSpecialSet("friends", jsonString);
+            Set<String> devs = GitHubJsonFetcher.parseJsonToSpecialSet("devs", jsonString);
+            Set<String> teamMembers = GitHubJsonFetcher.parseJsonToSpecialSet("teamMembers", jsonString);
+            Set<String> translators = GitHubJsonFetcher.parseJsonToSpecialSet("translators", jsonString);
+
+            for (Map.Entry<String, String> entry : users.entrySet()) {
+                if (entry.getValue().equals(playerName)) {
+                    playerID = entry.getKey();
+                }
             }
+
+            if (friends.contains(playerName)) Chars.FRIEND.addBadge(newComponent, tooltip);
+            if (devs.contains(playerID)) Chars.DEV.addBadge(newComponent, tooltip);
+            else if (teamMembers.contains(playerID)) Chars.TEAM.addBadge(newComponent, tooltip);
+            else if (translators.contains(playerID)) Chars.TRANSLATOR.addBadge(newComponent, tooltip);
+            else if (users.containsKey(playerID)) Chars.USER.addBadge(newComponent, tooltip);
+
+            return (tooltip) ? newComponent.append(text) : text.append(" ").append(newComponent);
         }
-
-        if (StaticValues.friends.contains(playerName)) Chars.FRIEND.addBadge(newComponent, tooltip);
-
-        if (StaticValues.devs.contains(playerID)) Chars.DEV.addBadge(newComponent, tooltip);
-        else if (StaticValues.teamMembers.contains(playerID)) Chars.TEAM.addBadge(newComponent, tooltip);
-        else if (StaticValues.translators.contains(playerID)) Chars.TRANSLATOR.addBadge(newComponent, tooltip);
-        else if (StaticValues.users.containsKey(playerID)) Chars.USER.addBadge(newComponent, tooltip);
-
-        return (tooltip) ? newComponent.append(text) : text.append(" ").append(newComponent);
+        return text;
     }
 }

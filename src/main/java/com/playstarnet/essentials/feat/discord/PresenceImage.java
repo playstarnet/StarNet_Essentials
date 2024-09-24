@@ -2,7 +2,7 @@ package com.playstarnet.essentials.feat.discord;
 
 public class PresenceImage {
     public enum Large {
-        SCENE("scene"),
+        STAR("star"),
         SCENE_DARK("scene_dark"),
         PINEAPPLE("pineapple_512"),
         ROUNDEL("roundel_512");

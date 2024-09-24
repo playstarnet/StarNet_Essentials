@@ -1,112 +1,92 @@
 package com.playstarnet.essentials.feat.discord;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.jagrosh.discordipc.IPCClient;
-import com.jagrosh.discordipc.IPCListener;
-import com.jagrosh.discordipc.entities.Packet;
-import com.jagrosh.discordipc.entities.RichPresence;
-import com.jagrosh.discordipc.entities.User;
+import club.minnced.discord.rpc.DiscordEventHandlers;
+import club.minnced.discord.rpc.DiscordRPC;
+import club.minnced.discord.rpc.DiscordRichPresence;
 import com.playstarnet.essentials.StarNetEssentials;
 import com.playstarnet.essentials.feat.config.model.GeneralConfigModel;
 import com.playstarnet.essentials.feat.location.Location;
 import com.playstarnet.essentials.util.HUDUtil;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class DiscordManager {
     public static boolean active = false;
-    private static IPCClient client;
     private static Instant start;
+    DiscordRPC discord = DiscordRPC.INSTANCE; //discord rich presence instance
+    String appID = "1287574652503195759"; //app id for discord, you should probably NOT change this
+    String steamId = ""; //this is useless because minecraft isn't a steam game, this is just for the sake of
+    // passing it in methods
+    DiscordEventHandlers handlers = new DiscordEventHandlers(); //discord event handler
+    Timer t = new Timer();
+    Long start_time = System.currentTimeMillis() / 1000;
+    String largeImageKey;
 
-    public DiscordManager start() {
+
+    public void start() {
         if (!active && GeneralConfigModel.DISCORD_RPC.value) {
-            StarNetEssentials.logger().info("Starting Discord RPC client...");
-            client = new IPCClient(1287574652503195759L);
-            client.setListener(new IPCListener() {
-                @Override
-                public void onPacketSent(IPCClient client, Packet packet) {
+//            StarNetEssentials.logger().info("Starting Discord RPC client...");
+            handlers.ready = (user) -> {
+                StarNetEssentials.logger().info("Discord RPC is ready");
+                active = true;
+                start = Instant.now();
+            };
+            handlers.disconnected = (errorCode, message) -> {
+                active = false;
+            };
+            discord.Discord_Initialize(appID, handlers, true, steamId);
 
+            basicDiscordPresence();
+            new Thread(() -> {
+                while (!Thread.currentThread().isInterrupted()) {
+                    discord.Discord_RunCallbacks();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignored) {
+                    }
                 }
+            }, "RPC-Callback-Handler").start();
 
+            t.scheduleAtFixedRate(new TimerTask() {
                 @Override
-                public void onPacketReceived(IPCClient client, Packet packet) {
-
+                public void run() {
+                    updateDiscordPresence();
                 }
-
-                @Override
-                public void onActivityJoin(IPCClient client, String secret) {
-
-                }
-
-                @Override
-                public void onActivitySpectate(IPCClient client, String secret) {
-
-                }
-
-                @Override
-                public void onActivityJoinRequest(IPCClient client, String secret, User user) {
-
-                }
-
-                @Override
-                public void onReady(IPCClient client) {
-                    StarNetEssentials.logger().info("Discord RPC client connected!");
-                    active = true;
-                    start = Instant.now();
-                    update();
-                }
-
-                @Override
-                public void onClose(IPCClient client, JsonObject json) {
-                    active = false;
-                }
-
-                @Override
-                public void onDisconnect(IPCClient client, Throwable t) {
-                    active = false;
-                }
-            });
-
-            try {
-                client.connect();
-            } catch (Exception ignored) {}
+            }, 5000, 100);
         }
-        return this;
     }
 
-    public void update() {
+    public void basicDiscordPresence() {
+        Location.check();
+        Location loc = StarNetEssentials.location();
+        DiscordRichPresence presence = new DiscordRichPresence();
+        presence.largeImageKey = largeImageKey;
+        presence.details = loc.description;
+        presence.state = loc.name.contains("<player>") ? loc.name.replace("<player>", Objects.requireNonNull(HUDUtil.getCurrentRoomName())) : loc.name;
+        presence.largeImageKey = loc.largeIcon.key();
+        presence.largeImageText = "StarNet Essentials v" + StarNetEssentials.version();
+        presence.instance = 1;
+        presence.startTimestamp = start_time;
+
+        //all of this stuff here is useless
+        presence.partyId = "priv_party";
+        presence.matchSecret = "abXyyz";
+        presence.joinSecret = "moonSqikCklaw";
+        presence.spectateSecret = "moonSqikCklawkLopalwdNq";
+        discord.Discord_UpdatePresence(presence);
+    }
+
+    public void updateDiscordPresence() {
         if (active && GeneralConfigModel.DISCORD_RPC.value) {
-            Location loc = StarNetEssentials.location();
-            RichPresence.Builder builder = new RichPresence.Builder();
-
-            JsonArray buttonsArray = new JsonArray();
-
-            JsonObject discordLinkButton = new JsonObject();
-            discordLinkButton.addProperty("label", "Linktree");
-            discordLinkButton.addProperty("url", "https://linktr.ee/playstarnet");
-
-            JsonObject githubLinkButton = new JsonObject();
-            githubLinkButton.addProperty("label", "GitHub");
-            githubLinkButton.addProperty("url", "https://github.com/StarNet/StarNet_Essentials");
-
-            buttonsArray.add(discordLinkButton);
-            buttonsArray.add(githubLinkButton);
-
-            builder.setState(loc.description)
-                    .setDetails(loc.name.contains("<player>") ? loc.name.replace("<player>", Objects.requireNonNull(HUDUtil.getCurrentRoomName())) : loc.name)
-                    .setStartTimestamp(Instant.ofEpochSecond(start.toEpochMilli()).atOffset(ZoneOffset.UTC).toEpochSecond())
-                    .setLargeImage(loc.largeIcon.key(), "HideawayPlus v" + StarNetEssentials.version())
-                    .setSmallImage(loc.smallIcon.key(), "Nothing to see here...")
-                    .setButtons(buttonsArray);
-            client.sendRichPresence(builder.build());
+            basicDiscordPresence();
         } else start();
     }
 
     public void stop() {
-            client.sendRichPresence(null);
-            active = false;
+        discord.Discord_ClearPresence();
+        active = false;
     }
 }

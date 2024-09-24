@@ -43,9 +43,12 @@ dependencies {
     modImplementation ("com.terraformersmc:modmenu:11.0.2")
 
     implementation include('org.json:json:20220320')
-    implementation include("io.github.CDAGaming:DiscordIPC:0.8.1")
+    include(implementation ('club.minnced:discord-rpc-release:v3.3.0'))
+    include(implementation("com.github.MinnDevelopment:java-discord-rpc:v2.0.2"))
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.2")
+    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0-beta.3")))
+    implementation(include('com.fasterxml.jackson.core:jackson-databind:2.13.3'))
 }
 
 processResources {

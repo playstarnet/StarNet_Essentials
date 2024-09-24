@@ -8,6 +8,7 @@ import com.playstarnet.essentials.feat.lifecycle.Lifecycle;
 import com.playstarnet.essentials.feat.lifecycle.Task;
 import com.playstarnet.essentials.feat.location.Location;
 import com.playstarnet.essentials.util.Constants;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,6 +16,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.FriendlyByteBuf;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,10 +46,10 @@ public class StarNetEssentials implements ClientModInitializer {
         }
 
         lifecycle()
-                .add(Task.of(Location::check, 20))
+                .add(Task.of(Location::check, 10))
                 .add(Task.of(() -> {
                     try {
-                        if (DiscordManager.active) DISCORD_MANAGER.update();
+                        if (DiscordManager.active) DISCORD_MANAGER.updateDiscordPresence();
                         if (DiscordManager.active && !GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.stop();
                         if (!DiscordManager.active && GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.start();
                     } catch (Error err) {

@@ -26,9 +26,13 @@ public abstract class EntityRendererMixin <T extends Entity>{
     private void render(T entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight, CallbackInfo ci) {
         if (this.shouldShowName(entity) && StarNetEssentials.connected() && entity instanceof Player) {
             String playerName = DisplayNameUtil.ignFromDisplayName(entity.getDisplayName().getString());
-            MutableComponent newName = DisplayNameUtil.withBadges((MutableComponent) entity.getDisplayName(), playerName, false);
-            this.renderNameTag(entity, newName, poseStack, buffer, packedLight, partialTick);
-            ci.cancel();
+			try {
+                MutableComponent newName = DisplayNameUtil.withBadges((MutableComponent) entity.getDisplayName(), playerName, false);
+                this.renderNameTag(entity, newName, poseStack, buffer, packedLight, partialTick);
+                ci.cancel();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
         }
     }
 }

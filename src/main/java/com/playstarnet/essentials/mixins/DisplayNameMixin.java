@@ -18,8 +18,13 @@ public class DisplayNameMixin {
         Component name = cir.getReturnValue();
         if (StarNetEssentials.connected()) {
             String playerName = DisplayNameUtil.ignFromDisplayName(name.getString());
-            MutableComponent newName = DisplayNameUtil.withBadges((MutableComponent) name, playerName, false);
-            cir.setReturnValue(newName);
+			MutableComponent newName = null;
+			try {
+				newName = DisplayNameUtil.withBadges((MutableComponent) name, playerName, false);
+                cir.setReturnValue(newName);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
         }
     }
 }

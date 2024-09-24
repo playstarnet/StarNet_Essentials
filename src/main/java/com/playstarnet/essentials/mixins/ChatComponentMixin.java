@@ -13,6 +13,10 @@ public class ChatComponentMixin {
     @ModifyVariable(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/network/chat/Component;)V", argsOnly = true)
     private Component addMessageIcons(Component message) {
         String playerName = DisplayNameUtil.nameFromChatMessage(message.getString());
-        return DisplayNameUtil.withBadges((MutableComponent) message, playerName, true);
-    }
+		try {
+			return DisplayNameUtil.withBadges((MutableComponent) message, playerName, true);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
