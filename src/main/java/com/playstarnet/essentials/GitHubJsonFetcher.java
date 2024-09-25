@@ -1,7 +1,7 @@
 package com.playstarnet.essentials;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -26,34 +26,29 @@ public class GitHubJsonFetcher {
         return content.toString();
     }
 
-    public static Map<String, String> parseJsonToUserMap(String jsonString) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(jsonString);
+    public static Map<String, String> parseJsonToUserMap(String jsonString) {
+        JsonObject rootNode = JsonParser.parseString(jsonString).getAsJsonObject();
         Map<String, String> userMap = new HashMap<>();
-        JsonNode usersNode = rootNode.get("users");
+        JsonObject usersNode = rootNode.getAsJsonObject("users");
         if (usersNode != null) {
-            Iterator<Map.Entry<String, JsonNode>> fields = usersNode.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> field = fields.next();
-                String uuid = field.getKey();
-                String username = field.getValue().asText();
+            for (Map.Entry<String, com.google.gson.JsonElement> entry : usersNode.entrySet()) {
+                String uuid = entry.getKey();
+                String username = entry.getValue().getAsString();
                 userMap.put(uuid, username);
             }
         }
         return userMap;
     }
 
-    public static Set<String> parseJsonToSpecialSet(String node, String jsonString) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(jsonString);
-        Set<String> devs = new HashSet<>();
-        JsonNode devsNode = rootNode.get(node);
-        if (devsNode != null) {
-            for (JsonNode devId : devsNode) {
-                devs.add(devId.asText());
+    public static Set<String> parseJsonToSpecialSet(String node, String jsonString) {
+        JsonObject rootNode = JsonParser.parseString(jsonString).getAsJsonObject();
+        Set<String> members = new HashSet<>();
+        if (rootNode.has(node)) {
+            for (com.google.gson.JsonElement element : rootNode.getAsJsonArray(node)) {
+                members.add(element.getAsString());
             }
         }
 
-        return devs;
+        return members;
     }
 }

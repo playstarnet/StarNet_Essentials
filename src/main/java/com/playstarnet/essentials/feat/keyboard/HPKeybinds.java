@@ -50,5 +50,10 @@ public class HPKeybinds {
                 ((ClientPacketListenerAccessor) client.getConnection()).se$sendCommand("mail");
             }
         }
+        while (KeybindModel.SETTINGS.keyMapping.consumeClick()) {
+            if (client.getConnection() != null) {
+                ((ClientPacketListenerAccessor) client.getConnection()).se$sendCommand("settings");
+            }
+        }
     }
 }
