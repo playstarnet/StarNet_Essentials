@@ -29,12 +29,9 @@ public class BossHealthOverlayMixin implements BossHealthOverlayAccessor {
     private void renderBossBarName(GuiGraphics guiGraphics, CallbackInfo ci) {
         Iterator<LerpingBossEvent> var4 = this.events.values().iterator();
         if (var4.hasNext()) {
-
             LerpingBossEvent lerpingBossEvent = var4.next();
-
             if (StarNetEssentials.location() == Location.DAZZLES_COSMETICS)
                 this.events.values().forEach(e -> e.setName(Component.nullToEmpty("")));
-
             this.bossBarName = lerpingBossEvent.getName().getString();
         } else {
             this.bossBarName = null;

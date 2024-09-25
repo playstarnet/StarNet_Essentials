@@ -34,7 +34,7 @@ public enum Chars {
         ChatFormatting.GREEN
     ),
     SETTINGS (
-        "\uEF01",
+        "\uEF06",
         null,
         ChatFormatting.WHITE
     );

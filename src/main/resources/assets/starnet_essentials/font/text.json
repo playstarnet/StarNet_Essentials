@@ -63,6 +63,13 @@
     },
     {
       "type": "bitmap",
+      "file": "starnet_essentials:setting.png",
+      "chars": [ "\uE006" ],
+      "height": 8,
+      "ascent": 7
+    },
+    {
+      "type": "bitmap",
       "file": "starnet_essentials:icons/full_inventory.png",
       "chars": ["\uE015"],
       "height": 8,
