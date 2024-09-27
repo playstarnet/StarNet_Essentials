@@ -46,7 +46,7 @@ public class StarNetEssentials implements ClientModInitializer {
         }
 
         lifecycle()
-                .add(Task.of(Location::check, 10))
+                .add(Task.of(Location::check, 40))
                 .add(Task.of(() -> {
                     try {
                         if (DiscordManager.active) DISCORD_MANAGER.updateDiscordPresence();

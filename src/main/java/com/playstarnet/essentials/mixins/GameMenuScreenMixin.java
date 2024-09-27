@@ -67,7 +67,7 @@ public abstract class GameMenuScreenMixin extends Screen {
         x = returnToGameRightButton.getX() + returnToGameRightButton.getWidth() + 4;
         y = returnToGameRightButton.getY();
 
-        if (gridLayout != null && !Constants.MOD_MENU_PRESENT) {
+        if (gridLayout != null/* && !Constants.MOD_MENU_PRESENT*/) {
             final List<LayoutElement> buttons = ((GridLayoutAccessor) gridLayout).getChildren();
             if (StarNetEssentials.connected()) {
                 buttons.add(Button.builder(Chars.SETTINGS.getComponent(), button -> this.minecraft.setScreen(new ConfigUI(this)))
