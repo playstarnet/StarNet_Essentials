@@ -5,10 +5,12 @@
   "name": "StarNet Essentials",
   "description": "Quality-of-life mod made to make the StarNet experience better.",
   "authors": [
-    "ella",
     "OliviaTheVampire",
-    "Dragonostic"
   ],
+  "contributors": [
+    "ella",
+    "StarNet Team"
+  ]
   "contact": {
     "homepage": "https://github.com/playstarnet/StarNet_Essentials",
     "sources": "https://linktr.ee/playstarnet"
