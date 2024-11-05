@@ -11,11 +11,19 @@ public class HUDUtil {
         if (StarNetEssentials.connected()) {
             BossEvent bar = StarNetEssentials.client().getSingleplayerServer().getCustomBossEvents().getEvents().stream().findFirst().get();
             String text = bar.getName().getString();
-            Pattern pattern = Pattern.compile("\\w*'s Island", Pattern.CASE_INSENSITIVE);
+
+            // Updated pattern to account for optional color codes like &b
+            Pattern pattern = Pattern.compile("(&[0-9a-fk-or])*\\w*'s Island", Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(text);
+
             if (matcher.find()) {
-                return matcher.group().replace("'s Island", "");
-            } else return null;
-        } else return null;
+                // Remove color codes and "'s Island" to return only the player's name
+                return matcher.group().replaceAll("(&[0-9a-fk-or])", "").replace("'s Island", "");
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 }
