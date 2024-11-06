@@ -1,6 +1,6 @@
 <div align="center">
 
-![Logo](https://github.com/playstarnet/StarNet_Essentials/blob/main/assets/header.png?raw=true)
+[![Logo](https://github.com/playstarnet/StarNet_Essentials/blob/main/assets/header.png?raw=true)](http://discord.playstarnet.com)
 
 # [StarNet Essentials](https://modrinth.com/mod/starnet-essentials)
 [![Discord](https://img.shields.io/discord/869883261235638322.svg?style=for-the-badge&color=%237289da&label=Discord&logo=discord&logoColor=%237289da)](http://discord.playstarnet.com) [![Modrinth](https://img.shields.io/modrinth/dt/RPyWWV8H?style=for-the-badge&logo=modrinth&label=Downloads&cacheSeconds=https%3A%2F%2Fmodrinth.com%2Fmod%2Fstarnet-essentials)](https://modrinth.com/mod/starnet-essentials)
