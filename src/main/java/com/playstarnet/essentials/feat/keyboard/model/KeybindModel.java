@@ -6,8 +6,8 @@ import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
 public enum KeybindModel {
-    WARDROBE(
-            "key.se.wardrobe",
+    POUCH(
+            "key.se.pouch",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_G,
             KeybindCategoryModel.STARNET_ESSENTIALS.translationString

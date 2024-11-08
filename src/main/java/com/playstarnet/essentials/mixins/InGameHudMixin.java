@@ -53,7 +53,7 @@ public abstract class InGameHudMixin implements InGameHudAccessor {
             Font font = minecraft.font;
             Component text = Component.empty()
                     .append(Component.literal("\uE015").setStyle(Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "text"))))
-                    .append(Component.literal(" Full inventory").withStyle(ChatFormatting.RED));
+                    .append(Component.literal(" Full Inventory").withStyle(ChatFormatting.RED));
             graphics.fill(0, yLevel - padding, 10 + padding + font.width(text), yLevel + padding - 1 + font.lineHeight, color);
             graphics.drawString(font, text, 10,yLevel, 0xffffff);
         }
