@@ -14,5 +14,5 @@ A Quality of Life mod designed to enhance your StarNet experience. With features
 
 ## 📝 Features
 1. **Discord Integration:** Share your in-game activities with friends! Whether you’re fishing, farming, or exploring, let them know exactly what you're up to.
-2. **Customizable Hotkeys:** Access everything you need with a keypress! From opening your storage pouch to teleporting to your island, there’s a hotkey for every action.
+2. **Customizable Hotkeys:** Access everything you need with a keypress! From opening the social pad to teleporting to your island, there’s a hotkey for every action.
 3. **Cosmetic Enhancements:** Easily adjust or disable cosmetics to suit your style, or fix their positioning for a cleaner look.
