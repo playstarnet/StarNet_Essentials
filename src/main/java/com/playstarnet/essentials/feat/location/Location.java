@@ -152,7 +152,7 @@ public enum Location {
 		if (checkLocation(playerLocation, new Vec3(262, 5, 199), "MAZIES_FARM", 20)) return;
 		if (checkLocation(playerLocation, new Vec3(218, -27, 153), "FURNITURE_CRAFTER", 10)) return;
 		if (checkLocation(playerLocation, new Vec3(-4245, 83, -1257), "SKULL_CAVES", 70)) return;
-		if (checkLocation(playerLocation, new Vec3(241, 8, 213), "LUMBERJACK", 15)) return;
+		if (checkLocation(playerLocation, new Vec3(245, -8, 215), "LUMBERJACK", 15)) return;
 
 		// Check for island name in the boss bar only if in the world "genworld"
 		if (client.level != null && "genworld".equals(client.level.dimension().location().getPath())) {
