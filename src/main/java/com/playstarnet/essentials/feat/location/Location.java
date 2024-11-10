@@ -71,9 +71,27 @@ public enum Location {
 	),
 
 	// Minigames
-	TRICK_OR_TREAT(
-			"Trick or Treat",
-			"Look at that view! 🏝️",
+	BEACH_FIGHT(
+			"Beach FIGHT!!",
+			"Splashing Around",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	AIR_TACKLE(
+			"Playing Air Tackle",
+			"Trying not to fall off.",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	PIZZA_PARTY(
+			"Playing Pizza Party",
+			"Too many orders!!!",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	PARKOUR(
+			"Playing Parkour Race",
+			"",
 			PresenceImage.Large.STAR,
 			PresenceImage.Small.ROUNDEL
 	),
@@ -130,10 +148,10 @@ public enum Location {
 
 		// Sequential location-based checks with early return on match
 		if (checkLocation(playerLocation, new Vec3(87, -30, 43), "FISHING_HOUSE", 25)) return;
-		if (checkLocation(playerLocation, new Vec3(197, -28, 147), "DAZZLES_COSMETICS", 5)) return;
+		if (checkLocation(playerLocation, new Vec3(185, -23, 218), "DAZZLES_COSMETICS", 5)) return;
 		if (checkLocation(playerLocation, new Vec3(262, 5, 199), "MAZIES_FARM", 20)) return;
 		if (checkLocation(playerLocation, new Vec3(218, -27, 153), "FURNITURE_CRAFTER", 10)) return;
-		if (checkLocation(playerLocation, new Vec3(-4247, 71, -1390), "SKULL_CAVES", 60)) return;
+		if (checkLocation(playerLocation, new Vec3(-4245, 83, -1257), "SKULL_CAVES", 70)) return;
 		if (checkLocation(playerLocation, new Vec3(241, 8, 213), "LUMBERJACK", 15)) return;
 
 		// Check for island name in the boss bar only if in the world "genworld"

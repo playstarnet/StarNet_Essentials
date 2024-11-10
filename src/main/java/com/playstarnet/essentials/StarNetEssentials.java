@@ -7,6 +7,7 @@ import com.playstarnet.essentials.feat.keyboard.HPKeybinds;
 import com.playstarnet.essentials.feat.lifecycle.Lifecycle;
 import com.playstarnet.essentials.feat.lifecycle.Task;
 import com.playstarnet.essentials.feat.location.Location;
+import com.playstarnet.essentials.feat.sound.SoundManager;
 import com.playstarnet.essentials.util.Constants;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
@@ -31,13 +32,13 @@ public class StarNetEssentials implements ClientModInitializer {
     private static Location LOCATION = Location.UNKNOWN;
     private static Lifecycle LIFECYCLE;
     private static final HPKeybinds KEYBINDS = new HPKeybinds();
+    public static final String MOD_ID = "starnet_essentials";
 
     @Override
     public void onInitializeClient() {
         Constants.MOD_MENU_PRESENT = FabricLoader.getInstance().isModLoaded("modmenu");
 
         LIFECYCLE = new Lifecycle();
-
         try {
             if (GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.start();
         } catch (Error err) {
@@ -47,6 +48,7 @@ public class StarNetEssentials implements ClientModInitializer {
 
         lifecycle()
                 .add(Task.of(Location::check, 40))
+                .add(Task.of(SoundManager::initialize, 0))
                 .add(Task.of(() -> {
                     try {
                         if (DiscordManager.active) DISCORD_MANAGER.updateDiscordPresence();
