@@ -71,9 +71,27 @@ public enum Location {
 	),
 
 	// Minigames
-	TRICK_OR_TREAT(
-			"Trick or Treat",
-			"Look at that view! 🏝️",
+	BEACH_FIGHT(
+			"Beach FIGHT!!",
+			"Splashing Around",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	AIR_TACKLE(
+			"Playing Air Tackle",
+			"Trying not to fall off.",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	PIZZA_PARTY(
+			"Playing Pizza Party",
+			"Too many orders!!!",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	PARKOUR(
+			"Playing Parkour Race",
+			"",
 			PresenceImage.Large.STAR,
 			PresenceImage.Small.ROUNDEL
 	),
@@ -115,9 +133,6 @@ public enum Location {
 		this.smallIcon = smallIcon;
 	}
 
-	// Lord have mercy on my soul for the amount of intense,
-	// messy and complicated hardcoding you are about to be
-	// subjected to. Grab a paper bag if you get sick easily.
 	public static void check() {
 		if (!StarNetEssentials.connected()) {
 			StarNetEssentials.setLocation(UNKNOWN);
@@ -125,39 +140,71 @@ public enum Location {
 		}
 
 		Minecraft client = Minecraft.getInstance();
-		MinecraftServer server = client.player.getServer();
-		Vec3 location = client.player.position();
-		String bossBarName;
+		if (client.player == null) {
+			return;
+		}
 
-		// Location-based
-		if (location.closerThan(new Vec3(1822f, -9f, -4909f), 10)) StarNetEssentials.setLocation(FISHING_HOUSE);
-		if (location.closerThan(new Vec3(1789f, -7f, -5012f), 10)) StarNetEssentials.setLocation(DAZZLES_COSMETICS);
-		if (location.closerThan(new Vec3(1962f, 12f, -5096f), 15)) StarNetEssentials.setLocation(MAZIES_FARM);
-		if (location.closerThan(new Vec3(1951f, -7f, -5196f), 10)) StarNetEssentials.setLocation(FURNITURE_CRAFTER);
-		if (location.closerThan(new Vec3(-4247, 71f, -1390f), 60)) StarNetEssentials.setLocation(SKULL_CAVES);
-		if (location.closerThan(new Vec3(1909f, 17f, -5081f), 15)) StarNetEssentials.setLocation(LUMBERJACK);
-		else if (server != null) {
-			// Scoreboard-based
-			ServerScoreboard board = server.getScoreboard();
-			Collection<String> boardNames = getBoardNames(board);
-			if (client.player.isSpectator()) StarNetEssentials.setLocation(WARDROBE);
-			else if ((bossBarName = ((BossHealthOverlayAccessor)client.gui.getBossOverlay()).se$getBossBarName()) != null) {
-				System.out.println(bossBarName);
-				if (bossBarName.contains(client.player.getGameProfile().getName() + "'s Island'")) StarNetEssentials.setLocation(ISLAND_SELF);
-				else if (bossBarName.contains("'s Island")) {
-					String visitingPlayerName = ((BossHealthOverlayAccessor)client.gui.getBossOverlay()).se$getBossBarName().split(" ")[0];
-					visitingPlayerName = visitingPlayerName.replace("'s", "");
+		Vec3 playerLocation = client.player.position();
 
-					Location.ISLAND_OTHER.name = "On " + visitingPlayerName + "'s Island";
+		// Sequential location-based checks with early return on match
+		if (checkLocation(playerLocation, new Vec3(87, -30, 43), "FISHING_HOUSE", 25)) return;
+		if (checkLocation(playerLocation, new Vec3(185, -23, 218), "DAZZLES_COSMETICS", 5)) return;
+		if (checkLocation(playerLocation, new Vec3(262, 5, 199), "MAZIES_FARM", 20)) return;
+		if (checkLocation(playerLocation, new Vec3(218, -27, 153), "FURNITURE_CRAFTER", 10)) return;
+		if (checkLocation(playerLocation, new Vec3(-4245, 83, -1257), "SKULL_CAVES", 70)) return;
+		if (checkLocation(playerLocation, new Vec3(245, -8, 215), "LUMBERJACK", 15)) return;
+
+		// Check for island name in the boss bar only if in the world "genworld"
+		if (client.level != null && "genworld".equals(client.level.dimension().location().getPath())) {
+			if (checkBossBarForIsland(client)) return;
+		}
+
+		// Set to GENERIC if no other match found
+		StarNetEssentials.setLocation(GENERIC);
+	}
+
+	// Method to check distance-based location and set it if within range
+	private static boolean checkLocation(Vec3 playerLocation, Vec3 targetLocation, String locationName, double maxDistance) {
+		double distance = playerLocation.distanceTo(targetLocation);
+
+		if (distance <= maxDistance) {
+			Location newLocation = Location.valueOf(locationName);
+			if (!StarNetEssentials.location().equals(newLocation)) {
+				StarNetEssentials.setLocation(newLocation);
+				StarNetEssentials.DISCORD_MANAGER.updateDiscordPresence(); // Trigger Discord update
+			}
+			return true;
+		}
+		return false;
+	}
+
+	// Method to check boss bar for island name and set location if matched
+	private static boolean checkBossBarForIsland(Minecraft client) {
+		String bossBarName = ((BossHealthOverlayAccessor) client.gui.getBossOverlay()).se$getBossBarName();
+		if (bossBarName != null) {
+			String strippedBossBarName = bossBarName.replaceAll("(&[0-9a-fk-or])", "").trim();
+
+			// Extract island name based on specific markers
+			String islandName = null;
+			int startIdx = strippedBossBarName.indexOf("ꐗ");
+			int endIdx = strippedBossBarName.indexOf("|");
+
+			if (startIdx != -1 && endIdx != -1 && startIdx < endIdx) {
+				islandName = strippedBossBarName.substring(startIdx + 1, endIdx).replace("꒩", " ").trim();
+			}
+
+			if (islandName != null && !islandName.isEmpty()) {
+				if (islandName.equals(client.player.getGameProfile().getName() + "'s Island")) {
+					StarNetEssentials.setLocation(ISLAND_SELF);
+					return true; // Match found
+				} else {
+					Location.ISLAND_OTHER.name = "On " + islandName;
 					StarNetEssentials.setLocation(ISLAND_OTHER);
-				}
-				else if (bossBarName.contains("\uE293 ")) {
-					StarNetEssentials.setLocation(ISLAND_OTHER);
+					return true; // Match found
 				}
 			}
-			else StarNetEssentials.setLocation(GENERIC);
 		}
-		else StarNetEssentials.setLocation(GENERIC);
+		return false; // No match found
 	}
 
 	private static Collection<String> getBoardNames(ServerScoreboard board) {
