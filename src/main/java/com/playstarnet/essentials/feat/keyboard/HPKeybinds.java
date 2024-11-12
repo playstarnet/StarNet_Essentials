@@ -24,10 +24,10 @@ public class HPKeybinds {
     public void tick() {
         Minecraft client = StarNetEssentials.client();
 
-        while (KeybindModel.POUCH.keyMapping.consumeClick()) {
+        while (KeybindModel.SOCIALPAD.keyMapping.consumeClick()) {
             if (client.player != null) {
                 // Access the item in the 8th hotbar slot (index 7, zero-based)
-                interactWithSlot(client, 7);
+                interactWithSlot(client, 8);
             }
         }
 

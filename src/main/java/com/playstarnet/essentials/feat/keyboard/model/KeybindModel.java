@@ -6,8 +6,8 @@ import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
 public enum KeybindModel {
-    POUCH(
-            "key.se.pouch",
+    SOCIALPAD(
+            "key.se.socalpad",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_G,
             KeybindCategoryModel.STARNET_ESSENTIALS.translationString
