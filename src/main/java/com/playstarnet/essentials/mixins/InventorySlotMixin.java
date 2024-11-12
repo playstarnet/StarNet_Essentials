@@ -26,6 +26,7 @@ public abstract class InventorySlotMixin {
     public void mayPickup(final Player player, final CallbackInfoReturnable<Boolean> cir) {
         final ItemStack itemStack = getItem();
         if (itemStack.isEmpty()) return;
+        if (player.isCreative()) return;
 
         if (!itemStack.has(DataComponents.CUSTOM_MODEL_DATA) && itemStack.getItem() != Items.PAPER) return;
 

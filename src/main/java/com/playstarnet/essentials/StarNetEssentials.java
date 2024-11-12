@@ -39,7 +39,7 @@ public class StarNetEssentials implements ClientModInitializer {
         LIFECYCLE = new Lifecycle();
 
         try {
-            if (GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.start();
+            if (GeneralConfigModel.DISCORD_RPC.value && !Minecraft.ON_OSX) DISCORD_MANAGER.start();
         } catch (Error err) {
             StarNetEssentials.logger().info(err);
             return;
@@ -48,12 +48,14 @@ public class StarNetEssentials implements ClientModInitializer {
         lifecycle()
                 .add(Task.of(Location::check, 40))
                 .add(Task.of(() -> {
-                    try {
-                        if (DiscordManager.active) DISCORD_MANAGER.updateDiscordPresence();
-                        if (DiscordManager.active && !GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.stop();
-                        if (!DiscordManager.active && GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.start();
-                    } catch (Error err) {
-                        StarNetEssentials.logger().error(err);
+                    if (!Minecraft.ON_OSX) {
+                        try {
+                            if (DiscordManager.active) DISCORD_MANAGER.updateDiscordPresence();
+                            if (DiscordManager.active && !GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.stop();
+                            if (!DiscordManager.active && GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.start();
+                        } catch (Error err) {
+                            StarNetEssentials.logger().error(err);
+                        }
                     }
                 }, 10))
                 .add(Task.of(() -> {

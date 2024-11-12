@@ -16,7 +16,7 @@ import java.util.TimerTask;
 public class DiscordManager {
     public static boolean active = false;
     private static Instant start;
-    DiscordRPC discord = DiscordRPC.INSTANCE; //discord rich presence instance
+    DiscordRPC discord;
     String appID = "1287574652503195759"; //app id for discord, you should probably NOT change this
     String steamId = ""; //this is useless because minecraft isn't a steam game, this is just for the sake of
     // passing it in methods
@@ -28,6 +28,7 @@ public class DiscordManager {
 
     public void start() {
         if (!active && GeneralConfigModel.DISCORD_RPC.value) {
+            discord = DiscordRPC.INSTANCE; //discord rich presence instance
 //            StarNetEssentials.logger().info("Starting Discord RPC client...");
             handlers.ready = (user) -> {
                 StarNetEssentials.logger().info("Discord RPC is ready");
@@ -60,6 +61,7 @@ public class DiscordManager {
     }
 
     public void basicDiscordPresence() {
+        if (discord == null) return;
         Location.check();
         Location loc = StarNetEssentials.location();
         DiscordRichPresence presence = new DiscordRichPresence();
@@ -80,12 +82,14 @@ public class DiscordManager {
     }
 
     public void updateDiscordPresence() {
+        if (discord == null) return;
         if (active && GeneralConfigModel.DISCORD_RPC.value) {
             basicDiscordPresence();
         } else start();
     }
 
     public void stop() {
+        if (discord == null) return;
         discord.Discord_ClearPresence();
         active = false;
     }
