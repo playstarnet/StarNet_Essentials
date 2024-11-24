@@ -9,7 +9,6 @@ import com.playstarnet.essentials.feat.lifecycle.Task;
 import com.playstarnet.essentials.feat.location.Location;
 import com.playstarnet.essentials.feat.sound.SoundManager;
 import com.playstarnet.essentials.util.Constants;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,7 +16,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.FriendlyByteBuf;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +31,7 @@ public class StarNetEssentials implements ClientModInitializer {
     private static Location LOCATION = Location.UNKNOWN;
     private static Lifecycle LIFECYCLE;
     private static final HPKeybinds KEYBINDS = new HPKeybinds();
-    public static final String MOD_ID = "starnet_essentials";
+    private boolean alreadyReported = false;
 
     @Override
     public void onInitializeClient() {
@@ -42,7 +41,7 @@ public class StarNetEssentials implements ClientModInitializer {
         try {
             if (GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.start();
         } catch (Error err) {
-            StarNetEssentials.logger().info(err);
+            StarNetEssentials.logger().info("Error starting Discord Manager: ", err);
             return;
         }
 
@@ -55,7 +54,7 @@ public class StarNetEssentials implements ClientModInitializer {
                         if (DiscordManager.active && !GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.stop();
                         if (!DiscordManager.active && GeneralConfigModel.DISCORD_RPC.value) DISCORD_MANAGER.start();
                     } catch (Error err) {
-                        StarNetEssentials.logger().error(err);
+                        StarNetEssentials.logger().error("Error in Discord lifecycle task: ", err);
                     }
                 }, 10))
                 .add(Task.of(() -> {
@@ -68,13 +67,19 @@ public class StarNetEssentials implements ClientModInitializer {
     public static boolean connected() {
         ServerData server = Minecraft.getInstance().getCurrentServer();
         if (server != null) {
-            return server.ip.toLowerCase().endsWith("playstarnet.com") && !server.ip.toLowerCase().contains("event");
-        } else return false;
+            boolean isConnected = server.ip.toLowerCase().endsWith("playstarnet.com") && !server.ip.toLowerCase().contains("event");
+            if (isConnected) {
+                ModrinthUpdateChecker.checkForUpdates(); // Trigger the update check
+            }
+            return isConnected;
+        } else {
+            return false;
+        }
     }
 
     public static String version() {
         return String.valueOf(
-            FabricLoader.getInstance().getModContainer(Constants.MOD_ID).get().getMetadata().getVersion()
+                FabricLoader.getInstance().getModContainer(Constants.MOD_ID).get().getMetadata().getVersion()
         );
     }
 
@@ -85,4 +90,5 @@ public class StarNetEssentials implements ClientModInitializer {
     public static Lifecycle lifecycle() { return LIFECYCLE; }
     public static Location location() { return LOCATION; }
     public static void setLocation(Location l) { LOCATION = l; }
+
 }
