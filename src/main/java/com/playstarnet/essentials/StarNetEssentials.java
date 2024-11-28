@@ -32,7 +32,7 @@ public class StarNetEssentials implements ClientModInitializer {
 	private static Location LOCATION = Location.UNKNOWN;
 	private static Lifecycle LIFECYCLE;
 	private static final HPKeybinds KEYBINDS = new HPKeybinds();
-	private static final boolean debugMode = true;
+	private static final boolean debugMode = false;
 	private static boolean updateChecked = false;
 	private static boolean soundCached = false;
 	private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
