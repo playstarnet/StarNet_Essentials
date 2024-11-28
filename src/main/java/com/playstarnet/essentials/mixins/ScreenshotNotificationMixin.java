@@ -1,5 +1,6 @@
 package com.playstarnet.essentials.mixins;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -23,36 +24,57 @@ public class ScreenshotNotificationMixin {
 
 	@Inject(method = "grab", at = @At("HEAD"), cancellable = true)
 	private static void onScreenshotSaved(File gameDirectory, RenderTarget framebuffer, Consumer<Component> messageReceiver, CallbackInfo ci) {
-		// Get the screenshots folder
+		Minecraft client = Minecraft.getInstance();
 		File screenshotsFolder = new File(gameDirectory, "screenshots");
 		if (!screenshotsFolder.exists()) {
 			screenshotsFolder.mkdirs();
 		}
 
-		// Generate the screenshot file name based on the current timestamp
+		// Generate a timestamped file name
 		String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
 		String screenshotFileName = timestamp + ".png";
+		File screenshotFile = new File(screenshotsFolder, screenshotFileName);
 
-		// Create a custom notification for the player
-		Minecraft client = Minecraft.getInstance();
+		// Save the screenshot
+		try {
+			NativeImage nativeImage = Screenshot.takeScreenshot(framebuffer);
+			nativeImage.writeToFile(screenshotFile); // Use the correct method to save
+			nativeImage.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			// Notify the user of failure
+			if (client.player != null) {
+				client.player.sendSystemMessage(
+						Component.literal("Failed to save screenshot.").withStyle(ChatFormatting.RED)
+				);
+			}
+			ci.cancel();
+			return;
+		}
+
+		// Create clickable components for the file and folder
 		if (client.player != null) {
-			// Create the clickable "Open Folder" message
+			Component openFile = Component.literal(screenshotFileName).withStyle(
+					Style.EMPTY.withColor(ChatFormatting.WHITE)
+							.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, screenshotFile.getAbsolutePath()))
+							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open the screenshot")))
+			);
+
 			Component openFolder = Component.literal("[Open Folder]").withStyle(
 					Style.EMPTY.withColor(ChatFormatting.YELLOW)
 							.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, screenshotsFolder.getAbsolutePath()))
 							.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to open the screenshots folder")))
 			);
 
-			// Create the main notification message
-			Component screenshotMessage = Component.literal("Saved screenshot (" + screenshotFileName + ") ")
-					.withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE))
-					.append(openFolder);
-
 			// Send the message to the player's chat
-			client.player.sendSystemMessage(screenshotMessage);
+			client.player.sendSystemMessage(
+					Component.literal("Saved screenshot (")
+							.append(openFile)
+							.append(") ")
+							.append(openFolder)
+			);
 		}
 
-		// Cancel the original method to prevent recursion
 		ci.cancel();
 	}
 }
