@@ -1,6 +1,7 @@
 package com.playstarnet.essentials.feat.ui;
 
 import com.google.gson.Gson;
+import com.playstarnet.essentials.StarNetEssentials;
 import com.playstarnet.essentials.mixins.ext.ChatScreenAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -20,6 +21,11 @@ public class EmojiPickerScreen {
 	private static final ResourceLocation EMOJI_PICKER_TEXTURE = ResourceLocation.parse("starnet_essentials:textures/gui/emojipicker.png");
 	private static final ResourceLocation EMOJI_BUTTON_TEXTURE = ResourceLocation.parse("starnet_essentials:textures/gui/button.png");
 	private static boolean pickerVisible = false;
+
+	// Caching the connection status
+	private static boolean isConnected = false;
+	private static long lastConnectionCheck = 0L;
+	private static final long CONNECTION_CHECK_INTERVAL_MS = 1000L; // Check every 1 second
 
 	// Relative positions (percentage of screen size)
 	private static final int BASE_BUTTON_X = 5; // Base X position for button
@@ -72,8 +78,21 @@ public class EmojiPickerScreen {
 		buttonY = (BASE_BUTTON_Y * currentGuiScale) / BASE_GUI_SCALE;
 	}
 
+	// Check and cache the connection status
+	private static boolean checkConnection() {
+		long currentTime = System.currentTimeMillis();
+		if (currentTime - lastConnectionCheck > CONNECTION_CHECK_INTERVAL_MS) {
+			isConnected = StarNetEssentials.connected();
+			lastConnectionCheck = currentTime;
+		}
+		return isConnected;
+	}
+
 	// Toggle picker visibility
 	public static void togglePicker() {
+		if (!checkConnection()) {
+			return; // Do nothing if not connected to the server
+		}
 		pickerVisible = !pickerVisible;
 		scrollOffset = 0;
 		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -81,6 +100,9 @@ public class EmojiPickerScreen {
 
 	// Render the EmojiPicker panel
 	public static void renderPicker(GuiGraphics graphics, int mouseX, int mouseY) {
+		if (!checkConnection()) {
+			return; // Do not render anything if not connected to the server
+		}
 		// Ensure positions are updated dynamically
 		updateScaledPositions();
 

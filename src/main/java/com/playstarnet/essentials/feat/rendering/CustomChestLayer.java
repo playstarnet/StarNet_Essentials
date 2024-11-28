@@ -21,6 +21,9 @@ public class CustomChestLayer<T extends AbstractClientPlayer, M extends EntityMo
     private final float scaleY;
     private final float scaleZ;
     private final ItemInHandRenderer itemInHandRenderer;
+
+    private static final boolean HIDE_COSMETIC = GeneralConfigModel.HIDE_COSMETIC.value;
+
     public CustomChestLayer(RenderLayerParent<T, M> renderer, EntityModelSet modelSet, ItemInHandRenderer itemInHandRenderer) {
         this(renderer, modelSet, 1.0f, 1.0f, 1.0f, itemInHandRenderer);
     }
@@ -36,26 +39,39 @@ public class CustomChestLayer<T extends AbstractClientPlayer, M extends EntityMo
     @Override
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, T player, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
         if (GeneralConfigModel.HIDE_COSMETIC.value) return;
+
         ItemStack chestArmor = player.getItemBySlot(EquipmentSlot.CHEST);
         if (chestArmor.isEmpty()) return;
 
         poseStack.pushPose();
+
+        // Apply scaling
         poseStack.scale(this.scaleX, this.scaleY, this.scaleZ);
-        CustomChestLayer.translateToBody(poseStack, player.isCrouching());
+
+        // Apply body transformations
+        translateToBody(poseStack, player.isCrouching());
+
+        // Render the item
         this.itemInHandRenderer.renderItem(player, chestArmor, ItemDisplayContext.HEAD, false, poseStack, buffer, packedLight);
+
         poseStack.popPose();
     }
 
     public static void translateToBody(PoseStack poseStack, boolean crouching) {
+        // Base translation
         poseStack.translate(0.0f, -0.25f, 0.0f);
+
         if (crouching) {
+            // Adjust for crouching posture
             poseStack.mulPose(Axis.XP.rotationDegrees(30.0f));
             poseStack.translate(0.0f, 0.15f, -0.245f);
         }
+
+        // Rotate to align with body
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0f));
+
+        // Scale and position adjustment
         poseStack.scale(0.625f, -0.625f, -0.625f);
         poseStack.translate(0.0D, 3, 0.0D);
     }
-
-
 }

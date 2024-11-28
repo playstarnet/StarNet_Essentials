@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 
 public class ModrinthUpdateChecker {
 	private static boolean hasChecked = false;
@@ -21,62 +22,75 @@ public class ModrinthUpdateChecker {
 	public static synchronized void checkForUpdates() {
 		// Avoid repeated checks
 		if (hasChecked) {
-			System.out.println("[ModrinthUpdateChecker] Update check already performed.");
+			StarNetEssentials.logger().info("[ModrinthUpdateChecker] Update check already performed.");
 			return;
 		}
 
-		hasChecked = true; // Immediately set the flag to prevent further calls
+		CompletableFuture.runAsync(() -> {
+			StarNetEssentials.logger().info("[ModrinthUpdateChecker] Starting update check...");
+			int maxRetries = 3;
+			int attempt = 0;
 
-		new Thread(() -> {
-			System.out.println("[ModrinthUpdateChecker] Starting update check...");
-			try {
-				URL url = new URL("https://api.modrinth.com/v2/project/RPyWWV8H/version");
-				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-				connection.setRequestMethod("GET");
-				connection.setConnectTimeout(5000); // Set timeout to 5 seconds
-				connection.setReadTimeout(5000); // Set read timeout to 5 seconds
-				connection.connect();
+			while (attempt < maxRetries) {
+				try {
+					attempt++;
+					URL url = new URL("https://api.modrinth.com/v2/project/RPyWWV8H/version");
+					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+					connection.setRequestMethod("GET");
+					connection.setConnectTimeout(5000); // 5 seconds timeout
+					connection.setReadTimeout(5000); // 5 seconds read timeout
+					connection.connect();
 
-				if (connection.getResponseCode() == 200) {
-					BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-					StringBuilder jsonResponse = new StringBuilder();
-					String line;
+					if (connection.getResponseCode() == 200) {
+						BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+						StringBuilder jsonResponse = new StringBuilder();
+						String line;
 
-					while ((line = reader.readLine()) != null) {
-						jsonResponse.append(line);
-					}
+						while ((line = reader.readLine()) != null) {
+							jsonResponse.append(line);
+						}
+						reader.close();
+						connection.disconnect();
 
-					reader.close();
+						// Parse JSON response
+						JsonArray versions = JsonParser.parseString(jsonResponse.toString()).getAsJsonArray();
+						JsonObject latestVersionInfo = versions.get(0).getAsJsonObject(); // Assume first is latest
+						String latestVersion = latestVersionInfo.get("version_number").getAsString();
+						String downloadUrl = latestVersionInfo.getAsJsonArray("files").get(0).getAsJsonObject().get("url").getAsString();
 
-					// Parse JSON response
-					JsonArray versions = JsonParser.parseString(jsonResponse.toString()).getAsJsonArray();
-					JsonObject latestVersionInfo = versions.get(0).getAsJsonObject(); // Assume first is latest
-					String latestVersion = latestVersionInfo.get("version_number").getAsString();
-					String downloadUrl = latestVersionInfo.getAsJsonArray("files").get(0).getAsJsonObject().get("url").getAsString();
+						// Compare current version with the latest version
+						if (!latestVersion.equals(Constants.VERSION)) {
+							Minecraft.getInstance().execute(() -> {
+								Component updateMessage = Component.literal("§e[StarNet Essentials] §fA new version is available! ")
+										.append(Component.literal("§aClick here to download.")
+												.setStyle(Style.EMPTY
+														.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, downloadUrl))
+														.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("§7Download the latest version")))));
 
-					if (!latestVersion.equals(Constants.VERSION)) {
-						Minecraft.getInstance().execute(() -> {
-							System.out.println("[ModrinthUpdateChecker] New version available: " + latestVersion);
-
-							// Create a clickable chat message
-							Component updateMessage = Component.literal("§e[StarNet Essentials] §fA new version is available! ")
-									.append(Component.literal("§aClick here to download.")
-											.setStyle(Style.EMPTY
-													.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, downloadUrl))
-													.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("§7Download the latest version")))));
-
-							// Send the message to the player's chat
-							if (Minecraft.getInstance().player != null) {
-								Minecraft.getInstance().player.sendSystemMessage(updateMessage);
-							}
-						});
+								// Send the message to the player's chat
+								if (Minecraft.getInstance().player != null) {
+									Minecraft.getInstance().player.sendSystemMessage(updateMessage);
+									setHasChecked(); // Mark as checked only after sending the message
+								}
+							});
+						} else {
+							StarNetEssentials.logger().info("[ModrinthUpdateChecker] Mod is up to date.");
+							setHasChecked(); // Mark as checked even if up to date
+						}
+						return; // Exit loop on success
 					} else {
-						System.out.println("[ModrinthUpdateChecker] Mod is up-to-date: " + Constants.VERSION);
+						StarNetEssentials.logger().warn("[ModrinthUpdateChecker] Failed to check for updates. Response code: " + connection.getResponseCode());
 					}
+				} catch (Exception e) {
+					StarNetEssentials.logger().error("[ModrinthUpdateChecker] Error while checking for updates on attempt " + attempt + ": ", e);
 				}
-			} catch (Exception e) {
-				System.err.println("[ModrinthUpdateChecker] Failed to fetch latest version: " + e.getMessage());
 			}
-		}).start();
+
+			StarNetEssentials.logger().error("[ModrinthUpdateChecker] Update check failed after " + maxRetries + " attempts.");
+		});
+	}
+
+	private static synchronized void setHasChecked() {
+		hasChecked = true;
 	}
 }

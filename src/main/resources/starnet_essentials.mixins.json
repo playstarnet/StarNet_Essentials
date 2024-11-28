@@ -23,6 +23,7 @@
 		"PlayerRendererMixin",
 		"TickMixin",
 		"TitleScreenMixin",
+		"ScreenshotNotificationMixin",
 //		"TooltipRenderUtilMixin",
 		"ext.ClientPacketListenerAccessor",
 		"ext.GridLayoutAccessor",
