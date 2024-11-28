@@ -1,25 +1,36 @@
 package com.playstarnet.essentials.feat.lifecycle;
 
 import java.util.*;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Lifecycle {
-    public static List<Task> functionStack = new ArrayList<>();
-    public static Map<String, CompletableFuture<Void>> asyncFunctionsStack = new HashMap<>();
+
+    private final List<Task> functionStack = Collections.synchronizedList(new ArrayList<>());
+    private final Map<String, CompletableFuture<Void>> asyncFunctionsStack = new ConcurrentHashMap<>();
 
     public void tick() {
-        for (Task func : functionStack) {
-            func.run();
+        // Execute synchronous tasks
+        synchronized (functionStack) {
+            for (Task func : functionStack) {
+                try {
+                    func.run();
+                } catch (Exception e) {
+                    System.err.println("Error executing task in functionStack: " + e.getMessage());
+                }
+            }
         }
 
-        for (CompletableFuture<Void> asyncFunc : asyncFunctionsStack.values()) {
-            asyncFunc.join();
-        }
-        asyncFunctionsStack.clear();
-
+        // Execute asynchronous tasks
+        asyncFunctionsStack.forEach((taskName, asyncFunc) -> {
+            asyncFunc.exceptionally(e -> {
+                System.err.println("Error in async task '" + taskName + "': " + e.getMessage());
+                return null;
+            }).thenRun(() -> {
+                // Cleanup after task completion
+                asyncFunctionsStack.remove(taskName);
+            });
+        });
     }
 
     public Lifecycle add(Task func) {
@@ -36,4 +47,3 @@ public class Lifecycle {
         return asyncFunctionsStack.containsKey(taskName);
     }
 }
-
