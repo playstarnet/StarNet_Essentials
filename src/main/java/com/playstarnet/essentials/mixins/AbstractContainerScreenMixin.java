@@ -3,6 +3,7 @@ package com.playstarnet.essentials.mixins;
 import com.playstarnet.essentials.StarNetEssentials;
 import com.playstarnet.essentials.feat.config.model.GeneralConfigModel;
 import com.playstarnet.essentials.feat.ext.AbstractContainerScreenAccessor;
+import com.playstarnet.essentials.feat.ui.EmojiPickerScreen;
 import com.playstarnet.essentials.util.ParseItemName;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -75,4 +76,5 @@ public abstract class AbstractContainerScreenMixin implements AbstractContainerS
 
     @Override
     public AbstractContainerMenu se$getMenu() { return this.menu; }
+
 }

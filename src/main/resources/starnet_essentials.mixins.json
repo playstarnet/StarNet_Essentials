@@ -16,15 +16,21 @@
 		"GameMenuScreenMixin",
 		"InGameHudMixin",
 		"InventorySlotMixin",
-		//    "ItemRendererMixin",
+		//"ItemRendererMixin",
+		"ChatScreenMixin",
 		"KeyMappingsMixin",
 		"OptionsMixin",
 		"PlayerRendererMixin",
 		"TickMixin",
+		"TitleScreenMixin",
+		"ScreenshotNotificationMixin",
 //		"TooltipRenderUtilMixin",
 		"ext.ClientPacketListenerAccessor",
 		"ext.GridLayoutAccessor",
-		"ext.KeyBindingAccessor"
+		"ext.KeyBindingAccessor",
+		"ext.ScreenAccessor",
+		"ext.ChatScreenAccessor"
+
 	],
 	"mixins": [
 		"NoteblockInteractionMixin"
