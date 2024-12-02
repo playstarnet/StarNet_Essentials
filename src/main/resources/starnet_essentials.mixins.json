@@ -25,6 +25,8 @@
 		"TitleScreenMixin",
 		"ScreenshotNotificationMixin",
 //		"TooltipRenderUtilMixin",
+		"HidePlayerNameTagMixin",
+		"SocialInteractionsScreenMixin",
 		"ext.ClientPacketListenerAccessor",
 		"ext.GridLayoutAccessor",
 		"ext.KeyBindingAccessor",

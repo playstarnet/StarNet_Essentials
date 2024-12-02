@@ -1,92 +1,129 @@
 package com.playstarnet.essentials.feat.discord;
 
-import club.minnced.discord.rpc.DiscordEventHandlers;
-import club.minnced.discord.rpc.DiscordRPC;
-import club.minnced.discord.rpc.DiscordRichPresence;
+import com.jagrosh.discordipc.IPCClient;
+import com.jagrosh.discordipc.IPCListener;
+import com.jagrosh.discordipc.entities.RichPresence;
+import com.jagrosh.discordipc.entities.pipe.PipeStatus;
 import com.playstarnet.essentials.StarNetEssentials;
 import com.playstarnet.essentials.feat.config.model.GeneralConfigModel;
 import com.playstarnet.essentials.feat.location.Location;
 import com.playstarnet.essentials.util.HUDUtil;
+import org.json.JSONObject;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class DiscordManager {
     public static boolean active = false;
-    private static Instant start;
-    DiscordRPC discord = DiscordRPC.INSTANCE; //discord rich presence instance
-    String appID = "1287574652503195759"; //app id for discord, you should probably NOT change this
-    String steamId = ""; //this is useless because minecraft isn't a steam game, this is just for the sake of
-    // passing it in methods
-    DiscordEventHandlers handlers = new DiscordEventHandlers(); //discord event handler
-    Timer t = new Timer();
+    private static OffsetDateTime startTime;
+    private static final String appID = "1287574652503195759";
+    private static IPCClient ipcClient;
+    private static Timer updateTimer;
     Long start_time = System.currentTimeMillis() / 1000;
-    String largeImageKey;
-
+    OffsetDateTime startTimestamp = OffsetDateTime.ofInstant(Instant.ofEpochSecond(start_time), ZoneId.systemDefault());
 
     public void start() {
         if (!active && GeneralConfigModel.DISCORD_RPC.value) {
-//            StarNetEssentials.logger().info("Starting Discord RPC client...");
-            handlers.ready = (user) -> {
-                StarNetEssentials.logger().info("Discord RPC is ready");
-                active = true;
-                start = Instant.now();
-            };
-            handlers.disconnected = (errorCode, message) -> {
-                active = false;
-            };
-            discord.Discord_Initialize(appID, handlers, true, steamId);
+            ipcClient = new IPCClient(Long.parseLong(appID));
 
-            basicDiscordPresence();
-            new Thread(() -> {
-                while (!Thread.currentThread().isInterrupted()) {
-                    discord.Discord_RunCallbacks();
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            }, "RPC-Callback-Handler").start();
-
-            t.scheduleAtFixedRate(new TimerTask() {
+            ipcClient.setListener(new IPCListener() {
                 @Override
-                public void run() {
-                    updateDiscordPresence();
+                public void onReady(IPCClient client) {
+                    StarNetEssentials.logger().info("Discord IPC is ready.");
+                    active = true;
+                    startTime = OffsetDateTime.now();
+                    basicDiscordPresence();
                 }
-            }, 5000, 100);
+
+                @Override
+                public void onDisconnect(IPCClient client, Throwable throwable) {
+                    StarNetEssentials.logger().warn("Discord IPC disconnected: " + (throwable != null ? throwable.getMessage() : "Unknown reason"));
+                    active = false;
+                }
+
+                @Override
+                public void onClose(IPCClient client, JSONObject json) {
+                    StarNetEssentials.logger().warn("Discord IPC closed: " + json);
+                    active = false;
+                }
+            });
+
+            try {
+                ipcClient.connect();
+            } catch (Exception e) {
+                StarNetEssentials.logger().error("Failed to connect to Discord IPC: " + e.getMessage());
+                return;
+            }
+
+            if (updateTimer == null) {
+                updateTimer = new Timer();
+                updateTimer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        updateDiscordPresence();
+                    }
+                }, 5000, 10000);
+            }
         }
     }
 
     public void basicDiscordPresence() {
+        if (ipcClient == null || ipcClient.getStatus() != PipeStatus.CONNECTED) return;
+
         Location.check();
         Location loc = StarNetEssentials.location();
-        DiscordRichPresence presence = new DiscordRichPresence();
-        presence.largeImageKey = largeImageKey;
-        presence.details = loc.description;
-        presence.state = loc.name.contains("<player>") ? loc.name.replace("<player>", Objects.requireNonNull(HUDUtil.getCurrentRoomName())) : loc.name;
-        presence.largeImageKey = loc.largeIcon.key();
-        presence.largeImageText = "StarNet Essentials v" + StarNetEssentials.version();
-        presence.instance = 1;
-        presence.startTimestamp = start_time;
 
-        //all of this stuff here is useless
-        presence.partyId = "priv_party";
-        presence.matchSecret = "abXyyz";
-        presence.joinSecret = "moonSqikCklaw";
-        presence.spectateSecret = "moonSqikCklawkLopalwdNq";
-        discord.Discord_UpdatePresence(presence);
+        // Create the presence builder
+        RichPresence.Builder presenceBuilder = new RichPresence.Builder();
+        presenceBuilder.setDetails(loc.description);
+        presenceBuilder.setState(loc.name.contains("<player>") ? loc.name.replace("<player>", Objects.requireNonNull(HUDUtil.getCurrentRoomName())) : loc.name);
+        presenceBuilder.setLargeImage(loc.largeIcon.key(), "StarNet Essentials v" + StarNetEssentials.version());
+        presenceBuilder.setInstance(true);
+        presenceBuilder.setStartTimestamp(startTimestamp);
+
+        // Add buttons to the presence
+        presenceBuilder.setButton1Text("Join StarNet");
+        presenceBuilder.setButton1Url("http://discord.playstarnet.com");
+        presenceBuilder.setButton2Text("Get StarNet Essentials");
+        presenceBuilder.setButton2Url("https://modrinth.com/mod/starnet-essentials");
+
+        presenceBuilder.setMatchSecret("abXyyz");
+        presenceBuilder.setJoinSecret("moonSqikCklaw");
+        presenceBuilder.setSpectateSecret("moonSqikCklawkLopalwdNq");
+
+        ipcClient.sendRichPresence(presenceBuilder.build());
+
+        try {
+            ipcClient.sendRichPresence(presenceBuilder.build());
+        } catch (Exception e) {
+            StarNetEssentials.logger().info("Failed to update Discord presence: " + e.getMessage());
+        }
     }
-
     public void updateDiscordPresence() {
         if (active && GeneralConfigModel.DISCORD_RPC.value) {
             basicDiscordPresence();
-        } else start();
+        } else {
+            stop();
+        }
     }
 
     public void stop() {
-        discord.Discord_ClearPresence();
+        if (ipcClient != null && ipcClient.getStatus() == PipeStatus.CONNECTED) {
+            try {
+                ipcClient.close();
+                StarNetEssentials.logger().info("Discord IPC stopped.");
+            } catch (Exception e) {
+                StarNetEssentials.logger().warn("Failed to properly close Discord IPC: " + e.getMessage());
+            }
+        }
+        if (updateTimer != null) {
+            updateTimer.cancel();
+            updateTimer = null;
+        }
         active = false;
     }
 }
