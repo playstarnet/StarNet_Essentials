@@ -43,8 +43,7 @@ dependencies {
     modImplementation ("com.terraformersmc:modmenu:11.0.2")
 
     implementation include('org.json:json:20220320')
-    include(implementation ('club.minnced:discord-rpc-release:v3.3.0'))
-    include(implementation("com.github.MinnDevelopment:java-discord-rpc:v2.0.2"))
+    include(implementation("com.github.CuteNyami:DiscordIPC-Buttons:main"))
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.2")
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0-beta.3")))

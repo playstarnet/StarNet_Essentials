@@ -18,6 +18,10 @@ public enum GeneralConfigModel {
     INVENTORY_RARITIES (
             true,
             "config.se.general.inventory_rarities"
+    ),
+    HIDE_PLAYER_NAME_TAGS ( // New option to hide player name tags
+            false,
+            "config.se.general.hide_player_name_tags"
     );
 
     public Boolean value;
