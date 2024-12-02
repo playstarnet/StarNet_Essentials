@@ -21,5 +21,7 @@
     "config.se.general.hide_cosmetics": "Hide Cosmetics",
     "config.se.general.discord_rpc": "DiscordRPC",
     "config.se.general.xp_percent": "Experience %",
-    "config.se.general.inventory_rarities": "Inventory Rarities"
+    "config.se.general.inventory_rarities": "Inventory Rarities",
+    "config.se.general.hide_npc_name_tags" : "F1 Hide NPC Tags",
+    "config.se.general.hide_player_name_tags": "F1 Hide Player Tag"
 }
