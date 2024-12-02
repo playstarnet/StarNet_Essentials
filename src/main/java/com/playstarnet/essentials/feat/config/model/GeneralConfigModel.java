@@ -22,6 +22,14 @@ public enum GeneralConfigModel {
     HIDE_PLAYER_NAME_TAGS ( // New option to hide player name tags
             false,
             "config.se.general.hide_player_name_tags"
+    ),
+    HIDE_NPC_NAME_TAGS ( // New option to hide npc name tags
+            false,
+            "config.se.general.hide_npc_name_tags"
+    ),
+    INVENTORY_OPEN_SOUND (
+            true,
+            "config.se.general.open_inventory_sound"
     );
 
     public Boolean value;

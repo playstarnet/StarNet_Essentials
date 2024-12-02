@@ -2,7 +2,7 @@
     "categories.se": "StarNet Essentials",
 
     "key.se.menu": "Open StarNet Essentials Menu",
-    "key.se.socalpad": "Open Social Pad",
+    "key.se.socialpad": "Open Social Pad",
     "key.se.profile": "Open Profile",
     "key.se.mail": "Open Mail",
     "key.se.map": "Open Map",
@@ -23,5 +23,6 @@
     "config.se.general.xp_percent": "Experience %",
     "config.se.general.inventory_rarities": "Inventory Rarities",
     "config.se.general.hide_npc_name_tags" : "F1 Hide NPC Tags",
-    "config.se.general.hide_player_name_tags": "F1 Hide Player Tag"
+    "config.se.general.hide_player_name_tags": "F1 Hide Player Tag",
+    "config.se.general.open_inventory_sound": "Open Inventory Sound"
 }

@@ -29,9 +29,9 @@ public class EmojiPickerScreen {
 
 	// Relative positions (percentage of screen size)
 	private static final int BASE_BUTTON_X = 5; // Base X position for button
-	private static final int BASE_BUTTON_Y = 325; // Base Y position for button
+	private static final int BASE_BUTTON_Y = 5; // Base Y position for button
 	private static final int BASE_PICKER_X = 5; // Base X position for picker
-	private static final int BASE_PICKER_Y = 246; // Base Y position for picker
+	private static final int BASE_PICKER_Y = 26; // Base Y position for picker
 	private static final int BASE_GUI_SCALE = 3; // The GUI scale used to define these base values
 
 	private static int pickerX;

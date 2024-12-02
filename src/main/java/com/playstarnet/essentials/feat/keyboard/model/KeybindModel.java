@@ -7,7 +7,7 @@ import org.lwjgl.glfw.GLFW;
 
 public enum KeybindModel {
     SOCIALPAD(
-            "key.se.socalpad",
+            "key.se.socialpad",
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_G,
             KeybindCategoryModel.STARNET_ESSENTIALS.translationString

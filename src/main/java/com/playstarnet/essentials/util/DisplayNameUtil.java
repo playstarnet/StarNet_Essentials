@@ -2,6 +2,7 @@ package com.playstarnet.essentials.util;
 
 import com.playstarnet.essentials.GitHubJsonFetcher;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 
 import java.util.Map;
@@ -34,30 +35,40 @@ public class DisplayNameUtil {
         String playerID = "";
         MutableComponent newComponent = Component.empty();
 
-        if (!playerName.isEmpty()) {
-            String jsonUrl = "https://raw.githubusercontent.com/playstarnet/StarNet_Essentials/refs/heads/main/users.json";
-            String jsonString = GitHubJsonFetcher.fetchJsonFromGitHub(jsonUrl);
+        String jsonUrl = "https://raw.githubusercontent.com/playstarnet/StarNet_Essentials/refs/heads/main/users.json";
+        String jsonString = GitHubJsonFetcher.fetchJsonFromGitHub(jsonUrl);
 
-            Map<String, String> users = GitHubJsonFetcher.parseJsonToUserMap(jsonString);
-            Set<String> friends = GitHubJsonFetcher.parseJsonToSpecialSet("friends", jsonString);
-            Set<String> devs = GitHubJsonFetcher.parseJsonToSpecialSet("devs", jsonString);
-            Set<String> teamMembers = GitHubJsonFetcher.parseJsonToSpecialSet("teamMembers", jsonString);
-            Set<String> translators = GitHubJsonFetcher.parseJsonToSpecialSet("translators", jsonString);
+        Map<String, String> users = GitHubJsonFetcher.parseJsonToUserMap(jsonString);
+        Set<String> friends = GitHubJsonFetcher.parseJsonToSpecialSet("friends", jsonString);
+        Set<String> devs = GitHubJsonFetcher.parseJsonToSpecialSet("devs", jsonString);
+        Set<String> teamMembers = GitHubJsonFetcher.parseJsonToSpecialSet("teamMembers", jsonString);
+        Set<String> translators = GitHubJsonFetcher.parseJsonToSpecialSet("translators", jsonString);
 
-            for (Map.Entry<String, String> entry : users.entrySet()) {
-                if (entry.getValue().equals(playerName)) {
-                    playerID = entry.getKey();
-                }
+        for (Map.Entry<String, String> entry : users.entrySet()) {
+            if (entry.getValue().equals(playerName)) {
+                playerID = entry.getKey();
             }
-
-            if (friends.contains(playerName)) Chars.FRIEND.addBadge(newComponent, tooltip);
-            if (devs.contains(playerID)) Chars.DEV.addBadge(newComponent, tooltip);
-            else if (teamMembers.contains(playerID)) Chars.TEAM.addBadge(newComponent, tooltip);
-            else if (translators.contains(playerID)) Chars.TRANSLATOR.addBadge(newComponent, tooltip);
-            else if (users.containsKey(playerID)) Chars.USER.addBadge(newComponent, tooltip);
-
-            return (tooltip) ? newComponent.append(text) : text.append(" ").append(newComponent);
         }
-        return text;
+
+        if (devs.contains(playerID)) {
+            System.out.println("DEV");
+            Chars.DEV.addBadge(newComponent, tooltip);
+        }
+        else if (StaticValues.teamMembers.contains(playerID)) {
+            System.out.println("TEAM");
+            Chars.TEAM.addBadge(newComponent, tooltip);
+        }
+        else if (StaticValues.translators.contains(playerID)) {
+            System.out.println("TRANSLATOR");
+            Chars.TRANSLATOR.addBadge(newComponent, tooltip);
+        }
+        else if (StaticValues.users.containsKey(playerID)) {
+            System.out.println("USER");
+            Chars.USER.addBadge(newComponent, tooltip);
+        }
+
+        StaticValues.devs.forEach(System.out::println);
+
+        return tooltip ? newComponent.append(text) : text.append(" ").append(newComponent);
     }
 }

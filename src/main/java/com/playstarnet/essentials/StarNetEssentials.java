@@ -1,5 +1,6 @@
 package com.playstarnet.essentials;
 
+import com.playstarnet.essentials.feat.api.API;
 import com.playstarnet.essentials.feat.config.StarNetPlusConfig;
 import com.playstarnet.essentials.feat.config.model.GeneralConfigModel;
 import com.playstarnet.essentials.feat.discord.DiscordManager;
@@ -54,9 +55,32 @@ public class StarNetEssentials implements ClientModInitializer {
 
 		// Add lifecycle tasks
 		lifecycle()
+				.add(Task.of(() -> {
+					if (!StarNetEssentials.connected() && API.enabled) {
+						API.end();
+					}
+				}, 0))
 				.add(Task.of(Location::check, 200))
 				.add(Task.of(this::handleDiscordLifecycle, 10))
-				.add(Task.of(this::handleKeybinds, 10));
+				.add(Task.of(this::handleKeybinds, 10))
+				.add(Task.of(() -> {
+					if (StarNetEssentials.connected()) {
+						API.enabled = true;
+						API.tick();
+					}
+				}, 0))
+				.add(Task.of(() -> {
+					if (StarNetEssentials.connected()) {
+						API.live();
+					}
+				}, 50))
+				.add(Task.of(() -> {
+					if (StarNetEssentials.connected() && API.serverUnreachable) {
+						API.serverUnreachable = false;
+						API.tick();
+					}
+				}, 100))
+				.add(Task.of(API::modTeam, 50));
 
 		// Initialize the SoundManager
 		SoundManager.initialize();

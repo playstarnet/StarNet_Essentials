@@ -1,6 +1,7 @@
 package com.playstarnet.essentials.feat.sound;
 
 import com.playstarnet.essentials.StarNetEssentials;
+import com.playstarnet.essentials.feat.config.model.GeneralConfigModel;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
@@ -68,14 +69,15 @@ public class SoundManager {
 
 		// Play the sound
 		if (cachedSoundEvent != null && client.player != null && client.level != null) {
-			client.level.playSound(
-					client.player,
-					client.player.blockPosition(),
-					INTERFACE_CLICK_EVENT,
-					SoundSource.MASTER,
-					1.0F,
-					1.0F
-			);
+			if(GeneralConfigModel.INVENTORY_OPEN_SOUND.value)
+				client.level.playSound(
+						client.player,
+						client.player.blockPosition(),
+						INTERFACE_CLICK_EVENT,
+						SoundSource.MASTER,
+						0.3F,
+						1.0F
+				);
 		} else {
 			System.err.println("Sound not played: Sound not cached or player/level not ready.");
 		}
