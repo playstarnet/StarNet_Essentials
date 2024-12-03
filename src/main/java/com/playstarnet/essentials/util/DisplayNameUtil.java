@@ -35,39 +35,16 @@ public class DisplayNameUtil {
         String playerID = "";
         MutableComponent newComponent = Component.empty();
 
-        String jsonUrl = "https://raw.githubusercontent.com/playstarnet/StarNet_Essentials/refs/heads/main/users.json";
-        String jsonString = GitHubJsonFetcher.fetchJsonFromGitHub(jsonUrl);
-
-        Map<String, String> users = GitHubJsonFetcher.parseJsonToUserMap(jsonString);
-        Set<String> friends = GitHubJsonFetcher.parseJsonToSpecialSet("friends", jsonString);
-        Set<String> devs = GitHubJsonFetcher.parseJsonToSpecialSet("devs", jsonString);
-        Set<String> teamMembers = GitHubJsonFetcher.parseJsonToSpecialSet("teamMembers", jsonString);
-        Set<String> translators = GitHubJsonFetcher.parseJsonToSpecialSet("translators", jsonString);
-
-        for (Map.Entry<String, String> entry : users.entrySet()) {
+        for (Map.Entry<String, String> entry : StaticValues.users.entrySet()) {
             if (entry.getValue().equals(playerName)) {
                 playerID = entry.getKey();
             }
         }
 
-        if (devs.contains(playerID)) {
-            System.out.println("DEV");
-            Chars.DEV.addBadge(newComponent, tooltip);
-        }
-        else if (StaticValues.teamMembers.contains(playerID)) {
-            System.out.println("TEAM");
-            Chars.TEAM.addBadge(newComponent, tooltip);
-        }
-        else if (StaticValues.translators.contains(playerID)) {
-            System.out.println("TRANSLATOR");
-            Chars.TRANSLATOR.addBadge(newComponent, tooltip);
-        }
-        else if (StaticValues.users.containsKey(playerID)) {
-            System.out.println("USER");
-            Chars.USER.addBadge(newComponent, tooltip);
-        }
-
-        StaticValues.devs.forEach(System.out::println);
+        if (StaticValues.devs.contains(playerID)) Chars.DEV.addBadge(newComponent, tooltip);
+        else if (StaticValues.teamMembers.contains(playerID)) Chars.TEAM.addBadge(newComponent, tooltip);
+        else if (StaticValues.translators.contains(playerID)) Chars.TRANSLATOR.addBadge(newComponent, tooltip);
+        else if (StaticValues.users.containsKey(playerID)) Chars.USER.addBadge(newComponent, tooltip);
 
         return tooltip ? newComponent.append(text) : text.append(" ").append(newComponent);
     }

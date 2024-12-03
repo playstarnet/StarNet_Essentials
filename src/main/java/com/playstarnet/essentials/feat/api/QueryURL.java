@@ -25,7 +25,7 @@ public class QueryURL {
     private static final URL API_URL;
     static {
         try {
-            API_URL = new URL("http://87.106.35.48:3000/ ");
+            API_URL = new URL("http://87.106.35.48:3000/api/");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

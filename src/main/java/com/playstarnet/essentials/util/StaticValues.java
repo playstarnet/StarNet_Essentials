@@ -10,7 +10,7 @@ public class StaticValues {
     public static boolean shopScreenWasFilled = false;
     public static boolean friendsCheck = false;
     public static Map<String, String> users = new ConcurrentHashMap<>();
-    public static List<String> devs = List.of("b344687bec74479a95401aa8ccb13e92");
+    public static List<String> devs = new ArrayList<>();
     public static List<String> teamMembers = new ArrayList<>();
     public static List<String> translators = new ArrayList<>();
 }

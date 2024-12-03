@@ -32,7 +32,7 @@ public enum Location {
 	),
 	FURNITURE_CRAFTER(
 			"At The Furniture Crafter",
-			"Opening the furniture box",
+			"Opening the Furniture Box",
 			PresenceImage.Large.STAR,
 			PresenceImage.Small.ROUNDEL
 	),
@@ -45,6 +45,48 @@ public enum Location {
 	LUMBERJACK(
 			"At the Lumberjack",
 			"Chopping wood all day",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	BREAKFAST_CLUB(
+			"At the Breakfast Club",
+			"Grabbing a quick bite",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	ALICE_AREA(
+			"In Alice's Area",
+			"Taking care of capybaras",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	MOON_GHOST(
+			"Near the Moon Ghost",
+			"Watching the stars in the night and camping",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	CAMPING_GROUND(
+			"At the Camping Ground",
+			"Roasting marshmallows and telling stories",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	DUTCHMAN_CAVE(
+			"In the Dutchman's Cave",
+			"Searching for pirate treasure and doing quests",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	SIMONS_STORE(
+			"At Simon's Store",
+			"Browsing the wares",
+			PresenceImage.Large.STAR,
+			PresenceImage.Small.ROUNDEL
+	),
+	BILLYS_STORE(
+			"At Billy's Store",
+			"Checking out the bargains",
 			PresenceImage.Large.STAR,
 			PresenceImage.Small.ROUNDEL
 	),
@@ -148,11 +190,18 @@ public enum Location {
 
 		// Sequential location-based checks with early return on match
 		if (checkLocation(playerLocation, new Vec3(87, -30, 43), "FISHING_HOUSE", 25)) return;
-		if (checkLocation(playerLocation, new Vec3(185, -23, 218), "DAZZLES_COSMETICS", 5)) return;
+		if (checkLocation(playerLocation, new Vec3(185, -23, 218), "DAZZLES_COSMETICS", 10)) return;
 		if (checkLocation(playerLocation, new Vec3(262, 5, 199), "MAZIES_FARM", 20)) return;
 		if (checkLocation(playerLocation, new Vec3(218, -27, 153), "FURNITURE_CRAFTER", 10)) return;
 		if (checkLocation(playerLocation, new Vec3(-4245, 83, -1257), "SKULL_CAVES", 70)) return;
 		if (checkLocation(playerLocation, new Vec3(245, -8, 215), "LUMBERJACK", 15)) return;
+		if (checkLocation(playerLocation, new Vec3(304, -18, 105), "BREAKFAST_CLUB", 15)) return;
+		if (checkLocation(playerLocation, new Vec3(115, 2, 95), "ALICE_AREA", 5)) return;
+		if (checkLocation(playerLocation, new Vec3(140, 0, 80), "MOON_GHOST", 10)) return;
+		if (checkLocation(playerLocation, new Vec3(82, 4, 200), "CAMPING_GROUND", 15)) return;
+		if (checkLocation(playerLocation, new Vec3(309, -29, 133), "DUTCHMAN_CAVE", 10)) return;
+		if (checkLocation(playerLocation, new Vec3(245, -24, 264), "SIMONS_STORE", 5)) return;
+		if (checkLocation(playerLocation, new Vec3(163, -24, 264), "BILLYS_STORE", 5)) return;
 
 		// Check for island name in the boss bar only if in the world "genworld"
 		if (client.level != null && "genworld".equals(client.level.dimension().location().getPath())) {

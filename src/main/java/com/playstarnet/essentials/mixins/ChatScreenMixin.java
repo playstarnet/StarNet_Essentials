@@ -30,7 +30,7 @@ public class ChatScreenMixin {
 
 	@Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
 	private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-		System.out.println("ChatScreen mouseClicked: mouseX=" + mouseX + ", mouseY=" + mouseY);
+//		System.out.println("ChatScreen mouseClicked: mouseX=" + mouseX + ", mouseY=" + mouseY);
 
 		if (EmojiPickerScreen.handleMouseClick(mouseX, mouseY) && StarNetEssentials.connected()) {
 			System.out.println("EmojiPicker handled mouseClicked");
@@ -40,7 +40,7 @@ public class ChatScreenMixin {
 
 	@Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
 	private void onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
-		System.out.println("ChatScreen keyPressed: keyCode=" + keyCode);
+//		System.out.println("ChatScreen keyPressed: keyCode=" + keyCode);
 
 		if (EmojiPickerScreen.isPickerVisible() && StarNetEssentials.connected()) {
 			System.out.println("Blocking keyboard input while EmojiPicker is visible");
