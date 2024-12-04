@@ -20,6 +20,5 @@
   { "name": "point_up", "displayChar": "꓈" },
   { "name": "point_left", "displayChar": "꓉" },
   { "name": "point_right", "displayChar": "꓊" },
-  { "name": "raised_hands", "displayChar": "꒦" },
   { "name": "heart_hands", "displayChar": "꒥" }
 ]
