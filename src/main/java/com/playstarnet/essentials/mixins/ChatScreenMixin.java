@@ -33,7 +33,7 @@ public class ChatScreenMixin {
 //		System.out.println("ChatScreen mouseClicked: mouseX=" + mouseX + ", mouseY=" + mouseY);
 
 		if (EmojiPickerScreen.handleMouseClick(mouseX, mouseY) && StarNetEssentials.connected()) {
-			System.out.println("EmojiPicker handled mouseClicked");
+//			System.out.println("EmojiPicker handled mouseClicked");
 			cir.setReturnValue(true); // Block further processing
 		}
 	}
@@ -43,7 +43,7 @@ public class ChatScreenMixin {
 //		System.out.println("ChatScreen keyPressed: keyCode=" + keyCode);
 
 		if (EmojiPickerScreen.isPickerVisible() && StarNetEssentials.connected()) {
-			System.out.println("Blocking keyboard input while EmojiPicker is visible");
+//			System.out.println("Blocking keyboard input while EmojiPicker is visible");
 			cir.setReturnValue(true); // Block further processing
 		}
 	}

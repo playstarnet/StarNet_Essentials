@@ -37,7 +37,7 @@ public enum Location {
 			PresenceImage.Small.ROUNDEL
 	),
 	SKULL_CAVES(
-			"At the Skull Caves",
+			"At the Mining Island",
 			"Chilling with Bones",
 			PresenceImage.Large.STAR,
 			PresenceImage.Small.ROUNDEL
@@ -193,7 +193,7 @@ public enum Location {
 		if (checkLocation(playerLocation, new Vec3(185, -23, 218), "DAZZLES_COSMETICS", 10)) return;
 		if (checkLocation(playerLocation, new Vec3(262, 5, 199), "MAZIES_FARM", 20)) return;
 		if (checkLocation(playerLocation, new Vec3(218, -27, 153), "FURNITURE_CRAFTER", 10)) return;
-		if (checkLocation(playerLocation, new Vec3(-4245, 83, -1257), "SKULL_CAVES", 70)) return;
+		if (checkLocation(playerLocation, new Vec3(424, -13, 275), "SKULL_CAVES", 70)) return;
 		if (checkLocation(playerLocation, new Vec3(245, -8, 215), "LUMBERJACK", 15)) return;
 		if (checkLocation(playerLocation, new Vec3(304, -18, 105), "BREAKFAST_CLUB", 15)) return;
 		if (checkLocation(playerLocation, new Vec3(115, 2, 95), "ALICE_AREA", 5)) return;

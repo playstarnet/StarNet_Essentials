@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class SoundManager {
 
-	private static final ResourceLocation INTERFACE_CLICK_ID = ResourceLocation.parse("starnet_essentials:interface_click");
+	private static final ResourceLocation INTERFACE_CLICK_ID = ResourceLocation.parse("starnet_essentials:click1");
 	public static final SoundEvent INTERFACE_CLICK_EVENT = SoundEvent.createVariableRangeEvent(INTERFACE_CLICK_ID);
 
 	private static final Minecraft client = Minecraft.getInstance();
@@ -39,7 +39,7 @@ public class SoundManager {
 		// Register the inventory screen event listener
 		ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
 			if (screen instanceof InventoryScreen && StarNetEssentials.connected()) {
-				System.out.println("Inventory screen opened.");
+//				System.out.println("Inventory screen opened.");
 				playSoundWithCooldown();
 			}
 		});
@@ -51,7 +51,7 @@ public class SoundManager {
 				return client.getSoundManager().getSoundEvent(INTERFACE_CLICK_ID);
 			}
 		} catch (Exception e) {
-			StarNetEssentials.logger().error("Error retrieving sound event: " + INTERFACE_CLICK_ID, e);
+//			StarNetEssentials.logger().error("Error retrieving sound event: " + INTERFACE_CLICK_ID, e);
 		}
 		return null;
 	}
@@ -75,11 +75,11 @@ public class SoundManager {
 						client.player.blockPosition(),
 						INTERFACE_CLICK_EVENT,
 						SoundSource.MASTER,
-						0.3F,
+						1.0F,
 						1.0F
 				);
 		} else {
-			System.err.println("Sound not played: Sound not cached or player/level not ready.");
+//			System.err.println("Sound not played: Sound not cached or player/level not ready.");
 		}
 	}
 }
