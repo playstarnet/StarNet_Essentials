@@ -1,5 +1,7 @@
 package com.playstarnet.essentials.mixins;
 
+import com.playstarnet.essentials.StarNetEssentials;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Items;
@@ -8,7 +10,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import com.playstarnet.essentials.StarNetEssentials;
 
 @Mixin(ArmorStand.class)
 public abstract class ArmorStandMobMixin {
@@ -21,7 +22,9 @@ public abstract class ArmorStandMobMixin {
         boolean hasCosmetic = armorStand.getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.LEATHER_HORSE_ARMOR;
         Vec3 pos = armorStand.position();
         if (!pos.closerThan(new Vec3(71.5f, 5f, -135.5f), 5) && hasCosmetic) {
-            armorStand.kill();
+            if (!armorStand.level().isClientSide) {
+                armorStand.kill((ServerLevel) armorStand.level());
+            }
         }
     }
 

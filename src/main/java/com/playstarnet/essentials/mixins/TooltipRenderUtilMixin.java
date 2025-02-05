@@ -1,3 +1,4 @@
+/*
 package com.playstarnet.essentials.mixins;
 
 import com.playstarnet.essentials.StarNetEssentials;
@@ -86,4 +87,4 @@ public abstract class TooltipRenderUtilMixin {
 
         return FastColor.ARGB32.color(255, r, g, b);
     }
-}
+}*/

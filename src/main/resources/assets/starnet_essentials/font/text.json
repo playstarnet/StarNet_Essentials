@@ -22,21 +22,7 @@
     {
       "type": "bitmap",
       "file": "starnet_essentials:badge/user.png",
-      "chars": [ "\uEF01" ],
-      "height": 10,
-      "ascent": 9
-    },
-    {
-      "type": "bitmap",
-      "file": "starnet_essentials:badge/user.png",
       "chars": [ "\uE001" ],
-      "height": 8,
-      "ascent": 7
-    },
-    {
-      "type": "bitmap",
-      "file": "starnet_essentials:badge/friend.png",
-      "chars": [ "\uE002" ],
       "height": 8,
       "ascent": 7
     },

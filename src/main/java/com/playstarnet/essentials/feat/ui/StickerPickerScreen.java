@@ -16,9 +16,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class EmojiPickerScreen {
+public class StickerPickerScreen {
 	private static final ResourceLocation EMOJI_PICKER_TEXTURE = ResourceLocation.parse("starnet_essentials:textures/gui/emojipicker.png");
 	private static final ResourceLocation EMOJI_BUTTON_TEXTURE = ResourceLocation.parse("starnet_essentials:textures/gui/button.png");
 	private static boolean pickerVisible = false;
@@ -29,7 +28,7 @@ public class EmojiPickerScreen {
 	private static final long CONNECTION_CHECK_INTERVAL_MS = 1000L; // Check every 1 second
 
 	// Relative positions (percentage of screen size)
-	private static final int BASE_BUTTON_X = 5; // Base X position for button
+	private static final int BASE_BUTTON_X = 24; // Base X position for button
 	private static final int BASE_BUTTON_Y = 5; // Base Y position for button
 	private static final int BASE_PICKER_X = 5; // Base X position for picker
 	private static final int BASE_PICKER_Y = 26; // Base Y position for picker
@@ -50,21 +49,21 @@ public class EmojiPickerScreen {
 	private static final int PADDING = 8;
 	private static int scrollOffset = 0;
 
-	private static List<Map<String, String>> emojis = new ArrayList<>();
+	private static List<Sticker> stickers = new ArrayList<>();
 
 	// Load emojis
 	static {
-		loadEmojis();
+		loadStickers();
 		updateScaledPositions();
 	}
 
-	private static void loadEmojis() {
+	private static void loadStickers() {
 		try (InputStreamReader reader = new InputStreamReader(
-				Minecraft.getInstance().getResourceManager().open(ResourceLocation.parse("starnet_essentials:emojis/emoji.json")),
+				Minecraft.getInstance().getResourceManager().open(ResourceLocation.parse("starnet_essentials:stickers/stickers.json")),
 				StandardCharsets.UTF_8)) {
-			emojis = new Gson().fromJson(reader, new com.google.gson.reflect.TypeToken<List<Map<String, String>>>() {}.getType());
+			stickers = new Gson().fromJson(reader, new com.google.gson.reflect.TypeToken<List<Sticker>>() {}.getType());
 		} catch (Exception e) {
-			System.err.println("Failed to load emojis: " + e.getMessage());
+			System.err.println("Failed to load stickers: " + e.getMessage());
 		}
 	}
 
@@ -115,23 +114,30 @@ public class EmojiPickerScreen {
 			graphics.blit(RenderType::guiTextured, EMOJI_PICKER_TEXTURE, pickerX, pickerY, 0.0F, 0.0F, PICKER_WIDTH, PICKER_HEIGHT, 122, 75, 122, 75);
 
 			// Render the emojis
-			float scaleFactor = 1.25f; // Emoji size scaling
+			float scaleFactor = 0.7f; // Emoji size scaling
 			int scaledEmojiSize = (int) (EMOJI_SIZE * scaleFactor);
 			int hoverPadding = 1; // Additional pixels for hover box
 			int startX = pickerX + PADDING; // Padding for left margin
 			int startY = pickerY + PADDING; // Padding for top margin
-			int maxColumns = 9; // 9 emojis per row
+			int maxColumns = 5; // 9 emojis per row
 			int col = 0;
 
-			for (int i = 0; i < emojis.size(); i++) {
-				Map<String, String> emoji = emojis.get(i);
-				String displayChar = emoji.get("displayChar");
-				String emojiName = emoji.get("name");
+			for (int i = 0; i < stickers.size(); i++) {
+				Sticker sticker = stickers.get(i);
+				String displayChar = sticker.getDisplayChar();
+				String stickerName = sticker.getName();
+				int width = sticker.getWidth();
+				int height = sticker.getHeight();
+				int scaledStickerWidth = (int) (width / scaleFactor);
+				int scaledStickerHeight = (int) (height / scaleFactor);
 
-				// Calculate emoji position
-				int x = startX + col * (EMOJI_SIZE + SPACING);
+				// Calculate sticker position
+				int adjustedSpacing = (int) (SPACING * 1.0f);
+				int totalWidth = col * (scaledStickerWidth + adjustedSpacing);
+				int offsetX = (PICKER_WIDTH - totalWidth) / 2; // Center horizontally
+				int x = startX + offsetX + col * (scaledStickerWidth + adjustedSpacing);
 				int row = i / maxColumns;
-				int y = startY + row * (EMOJI_SIZE + SPACING) - scrollOffset;
+				int y = startY + row * (scaledStickerHeight + adjustedSpacing) - scrollOffset;
 
 				// Check if hovered
 				boolean isHovered = mouseX >= x && mouseX < x + EMOJI_SIZE && mouseY >= y && mouseY < y + EMOJI_SIZE;
@@ -139,13 +145,13 @@ public class EmojiPickerScreen {
 				// Draw hover highlight if hovered
 				if (isHovered) {
 					// Adjust hover box size to include padding
-					float centerX = x + scaledEmojiSize / 2.0f; // Center of the emoji in X
-					float centerY = y + scaledEmojiSize / 2.0f; // Center of the emoji in Y
+					float centerX = x + width / 2.0f; // Center of the emoji in X
+					float centerY = y + height / 2.0f; // Center of the emoji in Y
 					graphics.fill(
-							(int) (centerX - hoverPadding - scaledEmojiSize / 2.0f), // Left edge
-							(int) (centerY - hoverPadding - scaledEmojiSize / 2.0f), // Top edge
-							(int) (centerX - hoverPadding + scaledEmojiSize / 2.0f), // Right edge
-							(int) (centerY - hoverPadding + scaledEmojiSize / 2.0f), // Bottom edge
+							(int) (centerX - hoverPadding - scaledStickerWidth / 2.0f), // Left edge
+							(int) (centerY - hoverPadding - scaledStickerHeight / 2.0f), // Top edge
+							(int) (centerX - hoverPadding + scaledStickerWidth / 2.0f), // Right edge
+							(int) (centerY - hoverPadding + scaledStickerHeight / 2.0f), // Bottom edge
 							0x80FFFFFF // Semi-transparent white
 					);
 				}
@@ -173,7 +179,7 @@ public class EmojiPickerScreen {
 				if (isHovered) {
 					graphics.renderTooltip(
 							Minecraft.getInstance().font,
-							Component.nullToEmpty(":" + emojiName + ":"),
+							Component.nullToEmpty(":" + stickerName + ":"),
 							mouseX,
 							mouseY
 					);
@@ -195,7 +201,7 @@ public class EmojiPickerScreen {
 	// Handle mouse scrolling
 	public static boolean handleMouseScroll(double scrollDelta) {
 		int maxColumns = 9; // Fixed 9 emojis per row
-		int totalRows = (int) Math.ceil((double) emojis.size() / maxColumns);
+		int totalRows = (int) Math.ceil((double) stickers.size() / maxColumns);
 		int maxScrollOffset = Math.max(0, (totalRows - 5) * (EMOJI_SIZE + SPACING)); // Scroll based on total rows minus visible rows
 
 		scrollOffset = (int) Math.max(0, Math.min(scrollOffset - scrollDelta * (EMOJI_SIZE + SPACING), maxScrollOffset));
@@ -217,8 +223,8 @@ public class EmojiPickerScreen {
 			int startY = pickerY + PADDING - scrollOffset;
 			int maxColumns = 9; // Fixed 9 emojis per row
 
-			for (int i = 0; i < emojis.size(); i++) {
-				Map<String, String> emoji = emojis.get(i);
+			for (int i = 0; i < stickers.size(); i++) {
+				Sticker sticker = stickers.get(i);
 
 				// Calculate emoji bounds
 				int col = i % maxColumns;
@@ -227,8 +233,8 @@ public class EmojiPickerScreen {
 				int y = startY + row * (EMOJI_SIZE + SPACING);
 
 				if (mouseX >= x && mouseX < x + EMOJI_SIZE && mouseY >= y && mouseY < y + EMOJI_SIZE) {
-					String emojiName = emoji.get("name");
-					insertEmojiIntoChat(emojiName); // Insert the emoji into chat
+					String stickerName = sticker.getName();
+					insertStickerIntoChat(stickerName); // Insert the emoji into chat
 					togglePicker(); // Close the picker after selection
 					return true;
 				}
@@ -246,13 +252,12 @@ public class EmojiPickerScreen {
 		return false;
 	}
 
-	// Insert emoji into chat
-	private static void insertEmojiIntoChat(String emojiName) {
+	// Insert sticker into chat
+	private static void insertStickerIntoChat(String stickerName) {
 		Minecraft minecraft = Minecraft.getInstance();
-		if (minecraft.player != null && minecraft.screen instanceof ChatScreen) {
-			ChatScreen chatScreen = (ChatScreen) minecraft.screen;
+		if (minecraft.player != null && minecraft.screen instanceof ChatScreen chatScreen) {
 			String currentText = ((ChatScreenAccessor) chatScreen).getInput().getValue();
-			((ChatScreenAccessor) chatScreen).getInput().setValue(currentText + ":" + emojiName + ":");
+			((ChatScreenAccessor) chatScreen).getInput().setValue(currentText + ":" + stickerName + ":");
 		}
 	}
 

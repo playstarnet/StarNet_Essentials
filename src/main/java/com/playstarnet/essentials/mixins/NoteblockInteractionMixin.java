@@ -1,7 +1,6 @@
 package com.playstarnet.essentials.mixins;
 
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.level.block.NoteBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +16,7 @@ public class NoteblockInteractionMixin {
     }
 
     @Inject(method = "useItemOn", at = @At("HEAD"), cancellable = true)
-    private void se$useItemOn(CallbackInfoReturnable<ItemInteractionResult> cir) {
-        cir.setReturnValue(ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION);
+    private void se$useItemOn(CallbackInfoReturnable<InteractionResult> cir) {
+        cir.setReturnValue(InteractionResult.PASS);
     }
 }

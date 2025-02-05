@@ -18,7 +18,7 @@ import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,7 +47,7 @@ public abstract class InGameHudMixin implements InGameHudAccessor {
     @Inject(at = @At("HEAD"), method = "render")
     public void onRender(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
         if (!this.debugOverlay.showDebugScreen() && StarNetEssentials.connected() && minecraft.player.getInventory().getFreeSlot() == -1) {
-            int color = FastColor.ARGB32.color(100, 0, 0, 0);
+            int color = ARGB.color(100, 0, 0);
             int padding = 3;
             int yLevel = 30;
             Font font = minecraft.font;

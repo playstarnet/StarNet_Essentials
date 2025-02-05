@@ -21,5 +21,14 @@
   { "name": "point_left", "displayChar": "꓉" },
   { "name": "point_right", "displayChar": "꓊" },
   { "name": "raised_hands", "displayChar": "꒦" },
-  { "name": "heart_hands", "displayChar": "꒥" }
+  { "name": "heart_hands", "displayChar": "꒥" },
+  { "name": "camera", "displayChar": "ꔶ" },
+  { "name": "camera_with_flash", "displayChar": "ꔷ" },
+  { "name": "football", "displayChar": "ꔹ" },
+  { "name": "paint_brush", "displayChar": "ꔻ" },
+  { "name": "blue_paint_brush", "displayChar": "ꔸ" },
+  { "name": "yellow_paint_brush", "displayChar": "ꔺ" },
+  { "name": "green_paint_brush", "displayChar": "ꔼ" },
+  { "name": "pink_paint_brush", "displayChar": "ꔽ" },
+  { "name": "red_paint_brush", "displayChar": "ꔾ" }
 ]

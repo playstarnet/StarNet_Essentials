@@ -44,8 +44,8 @@ public class ScreenshotNotificationMixin {
 			e.printStackTrace();
 			// Notify the user of failure
 			if (client.player != null) {
-				client.player.sendSystemMessage(
-						Component.literal("Failed to save screenshot.").withStyle(ChatFormatting.RED)
+				client.player.displayClientMessage(
+						Component.literal("Failed to save screenshot.").withStyle(ChatFormatting.RED), false
 				);
 			}
 			ci.cancel();
@@ -67,11 +67,12 @@ public class ScreenshotNotificationMixin {
 			);
 
 			// Send the message to the player's chat
-			client.player.sendSystemMessage(
+			client.player.displayClientMessage(
 					Component.literal("Saved screenshot (")
 							.append(openFile)
 							.append(") ")
-							.append(openFolder)
+							.append(openFolder),
+					false
 			);
 		}
 

@@ -15,6 +15,7 @@ public class ChatScreenMixin {
 	@Inject(method = "render", at = @At("TAIL"))
 	private void onRender(GuiGraphics graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
 		if (StarNetEssentials.connected()) EmojiPickerScreen.renderPicker(graphics, mouseX, mouseY);
+//		if (StarNetEssentials.connected()) StickerPickerScreen.renderPicker(graphics, mouseX, mouseY);
 	}
 
 	@Inject(method = "mouseScrolled", at = @At("HEAD"), cancellable = true)
@@ -26,6 +27,13 @@ public class ChatScreenMixin {
 				cir.cancel();
 			}
 		}
+//		if (StickerPickerScreen.isPickerVisible() && StarNetEssentials.connected()) {
+//			boolean handled = StickerPickerScreen.handleMouseScroll(amountY); // Pass amountY for scrolling
+//			if (handled) {
+//				cir.setReturnValue(true); // Block further processing
+//				cir.cancel();
+//			}
+//		}
 	}
 
 	@Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
@@ -36,6 +44,10 @@ public class ChatScreenMixin {
 			System.out.println("EmojiPicker handled mouseClicked");
 			cir.setReturnValue(true); // Block further processing
 		}
+//		if (StickerPickerScreen.handleMouseClick(mouseX, mouseY) && StarNetEssentials.connected()) {
+//			System.out.println("StickerPicker handled mouseClicked");
+//			cir.setReturnValue(true); // Block further processing
+//		}
 	}
 
 	@Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
@@ -46,5 +58,9 @@ public class ChatScreenMixin {
 			System.out.println("Blocking keyboard input while EmojiPicker is visible");
 			cir.setReturnValue(true); // Block further processing
 		}
+//		if (StickerPickerScreen.isPickerVisible() && StarNetEssentials.connected()) {
+//			System.out.println("Blocking keyboard input while StickerPicker is visible");
+//			cir.setReturnValue(true); // Block further processing
+//		}
 	}
 }

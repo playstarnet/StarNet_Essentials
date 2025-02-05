@@ -4,7 +4,6 @@ import com.playstarnet.essentials.StarNetEssentials;
 import com.playstarnet.essentials.feat.discord.PresenceImage;
 import com.playstarnet.essentials.feat.ext.BossHealthOverlayAccessor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.phys.Vec3;
 
@@ -243,14 +242,14 @@ public enum Location {
 			}
 
 			if (islandName != null && !islandName.isEmpty()) {
+				// Match found
 				if (islandName.equals(client.player.getGameProfile().getName() + "'s Island")) {
 					StarNetEssentials.setLocation(ISLAND_SELF);
-					return true; // Match found
 				} else {
 					Location.ISLAND_OTHER.name = "On " + islandName;
 					StarNetEssentials.setLocation(ISLAND_OTHER);
-					return true; // Match found
 				}
+				return true; // Match found
 			}
 		}
 		return false; // No match found

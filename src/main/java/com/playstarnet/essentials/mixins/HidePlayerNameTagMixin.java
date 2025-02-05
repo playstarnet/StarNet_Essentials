@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ArmorStandRenderer;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class HidePlayerNameTagMixin {
 
 	@Redirect(
-			method = "shouldShowName",
+			method = "shouldShowName(Lnet/minecraft/world/entity/decoration/ArmorStand;D)Z",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;isCustomNameVisible()Z")
 	)
 	private boolean hideNameTags(ArmorStand armorStand) {
@@ -28,15 +29,13 @@ public abstract class HidePlayerNameTagMixin {
 		return armorStand.isCustomNameVisible();
 	}
 
+	@Unique
 	private boolean shouldHideNameTag(ArmorStand armorStand) {
 		// Hide player-related name tags
-		if (GeneralConfigModel.HIDE_PLAYER_NAME_TAGS.value && isPlayerNameTag(armorStand)) {
-			return true;
-		}
-
-		return false; // Default to not hiding
+		return GeneralConfigModel.HIDE_PLAYER_NAME_TAGS.value && isPlayerNameTag(armorStand);// Default to not hiding
 	}
 
+	@Unique
 	private boolean isPlayerNameTag(ArmorStand armorStand) {
 		// Ensure it has a custom name
 		if (armorStand.getCustomName() != null) {

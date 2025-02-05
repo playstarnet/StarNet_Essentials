@@ -69,7 +69,7 @@ public class ModrinthUpdateChecker {
 
 								// Send the message to the player's chat
 								if (Minecraft.getInstance().player != null) {
-									Minecraft.getInstance().player.sendSystemMessage(updateMessage);
+									Minecraft.getInstance().player.displayClientMessage(updateMessage, false);
 									setHasChecked(); // Mark as checked only after sending the message
 								}
 							});
