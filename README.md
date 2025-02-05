@@ -17,3 +17,5 @@ A Quality of Life mod designed to enhance your StarNet experience. With features
 2. **Customizable Hotkeys:** Access everything you need with a keypress! From opening the social pad to teleporting to your island, there’s a hotkey for every action.
 3. **Cosmetic Enhancements:** Easily adjust or disable cosmetics to suit your style, or fix their positioning for a cleaner look.
 4. **Emoji Keyboard:** One button to see and use the server emojis in chat
+5. **Chat Badges:** See other users that are using the mod.
+6. **Hide Name Tags:** Hide Player name tags when pressing F1 (Configurable)

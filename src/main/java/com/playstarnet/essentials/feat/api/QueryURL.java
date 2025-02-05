@@ -25,7 +25,7 @@ public class QueryURL {
     private static final URL API_URL;
     static {
         try {
-            API_URL = new URL("https://api.blueninjar.com/api/");
+            API_URL = new URL("http://api.blueninjar.com/api/");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

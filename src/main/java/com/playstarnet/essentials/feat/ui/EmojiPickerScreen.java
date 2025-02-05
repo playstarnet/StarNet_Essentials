@@ -59,25 +59,57 @@ public class EmojiPickerScreen {
 	}
 
 	private static void loadEmojis() {
-		try (InputStreamReader reader = new InputStreamReader(
-				Minecraft.getInstance().getResourceManager().open(ResourceLocation.parse("starnet_essentials:emojis/emoji.json")),
-				StandardCharsets.UTF_8)) {
+		String remoteUrl = "https://raw.githubusercontent.com/playstarnet/StarNet_Essentials/refs/heads/main/emoji.json";
+		boolean success = false;
+
+		// Attempt to load emojis from the remote URL
+		try (java.io.InputStream inputStream = new java.net.URL(remoteUrl).openStream();
+			 java.io.InputStreamReader reader = new java.io.InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+
+			// Parse the JSON from the remote URL
 			emojis = new Gson().fromJson(reader, new com.google.gson.reflect.TypeToken<List<Map<String, String>>>() {}.getType());
+			success = true; // Mark success if no exceptions occur
+			System.out.println("Successfully loaded emojis from remote URL.");
 		} catch (Exception e) {
-			System.err.println("Failed to load emojis: " + e.getMessage());
+			System.err.println("Failed to load emojis from remote URL: " + e.getMessage());
+		}
+
+		// Fallback to local file if remote URL loading fails
+		if (!success) {
+			System.err.println("Falling back to local emoji.json file...");
+			try (InputStreamReader reader = new InputStreamReader(
+					Minecraft.getInstance().getResourceManager().open(ResourceLocation.parse("starnet_essentials:emojis/emoji.json")),
+					StandardCharsets.UTF_8)) {
+
+				// Parse the JSON from the local file
+				emojis = new Gson().fromJson(reader, new com.google.gson.reflect.TypeToken<List<Map<String, String>>>() {}.getType());
+				System.out.println("Successfully loaded emojis from local file.");
+			} catch (Exception e) {
+				System.err.println("Failed to load emojis from local file: " + e.getMessage());
+			}
+		}
+
+		// If both fail, initialize an empty list as a last resort
+		if (emojis == null) {
+			emojis = new ArrayList<>();
+			System.err.println("Emojis list is empty. Failed to load from both remote URL and local file.");
 		}
 	}
 
-	// Update positions based on screen dimensions and GUI scale
 	private static void updateScaledPositions() {
-		int currentGuiScale = (int) Minecraft.getInstance().getWindow().getGuiScale();
+		Minecraft minecraft = Minecraft.getInstance();
+		int screenWidth = minecraft.getWindow().getGuiScaledWidth();
+		int screenHeight = minecraft.getWindow().getGuiScaledHeight();
 
-		// Scale positions relative to the base GUI scale
-		pickerX = (BASE_PICKER_X * currentGuiScale) / BASE_GUI_SCALE;
-		pickerY = (BASE_PICKER_Y * currentGuiScale) / BASE_GUI_SCALE;
-		buttonX = (BASE_BUTTON_X * currentGuiScale) / BASE_GUI_SCALE;
-		buttonY = (BASE_BUTTON_Y * currentGuiScale) / BASE_GUI_SCALE;
+		// Position the button to the very left of the screen
+		buttonX = 5; // Fixed padding from the left edge of the screen
+		buttonY = screenHeight - 35; // Move the button slightly lower by 5 pixels
+
+		// Position the picker relative to the button but above and slightly to the left
+		pickerX = buttonX - 0; // Shift the picker 10 pixels to the left to align with the button
+		pickerY = buttonY - PICKER_HEIGHT - 5; // Place it slightly above the button
 	}
+
 
 	// Check and cache the connection status
 	private static boolean checkConnection() {
@@ -117,7 +149,6 @@ public class EmojiPickerScreen {
 			// Render the emojis
 			float scaleFactor = 1.25f; // Emoji size scaling
 			int scaledEmojiSize = (int) (EMOJI_SIZE * scaleFactor);
-			int hoverPadding = 1; // Additional pixels for hover box
 			int startX = pickerX + PADDING; // Padding for left margin
 			int startY = pickerY + PADDING; // Padding for top margin
 			int maxColumns = 9; // 9 emojis per row
@@ -134,21 +165,13 @@ public class EmojiPickerScreen {
 				int y = startY + row * (EMOJI_SIZE + SPACING) - scrollOffset;
 
 				// Check if hovered
-				boolean isHovered = mouseX >= x && mouseX < x + EMOJI_SIZE && mouseY >= y && mouseY < y + EMOJI_SIZE;
+				boolean isHovered = mouseX >= x && mouseX < x + scaledEmojiSize && mouseY >= y && mouseY < y + scaledEmojiSize;
 
 				// Draw hover highlight if hovered
 				if (isHovered) {
-					// Adjust hover box size to include padding
-					float centerX = x + scaledEmojiSize / 2.0f; // Center of the emoji in X
-					float centerY = y + scaledEmojiSize / 2.0f; // Center of the emoji in Y
-					graphics.fill(
-							(int) (centerX - hoverPadding - scaledEmojiSize / 2.0f), // Left edge
-							(int) (centerY - hoverPadding - scaledEmojiSize / 2.0f), // Top edge
-							(int) (centerX - hoverPadding + scaledEmojiSize / 2.0f), // Right edge
-							(int) (centerY - hoverPadding + scaledEmojiSize / 2.0f), // Bottom edge
-							0x80FFFFFF // Semi-transparent white
-					);
+					renderEmojiHighlight(graphics, x, y, scaledEmojiSize);
 				}
+
 
 				// Only render emoji if visible
 				if (y >= pickerY + PADDING && y + scaledEmojiSize <= pickerY + PICKER_HEIGHT - PADDING) {
@@ -191,6 +214,27 @@ public class EmojiPickerScreen {
 		// Render the Emoji Button (rendered last, since it's not part of the picker panel)
 		graphics.blit(RenderType::guiTextured, EMOJI_BUTTON_TEXTURE, buttonX, buttonY, 0.0F, 0.0F, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT);
 	}
+
+	private static void renderEmojiHighlight(GuiGraphics graphics, int x, int y, int scaledEmojiSize) {
+		int hoverSize = 15; // Slightly larger than the emoji size of 16x16 pixels
+		int hoverOffset = (hoverSize - scaledEmojiSize) / 2; // Center the highlight around the emoji
+
+		// Calculate the hover box position and size
+		int hoverBoxLeft = x - hoverOffset;
+		int hoverBoxTop = y - hoverOffset;
+		int hoverBoxRight = x + scaledEmojiSize + hoverOffset - 2;
+		int hoverBoxBottom = y + scaledEmojiSize + hoverOffset - 2;
+
+		// Draw the hover highlight
+		graphics.fill(
+				hoverBoxLeft, // Left edge
+				hoverBoxTop, // Top edge
+				hoverBoxRight, // Right edge
+				hoverBoxBottom, // Bottom edge
+				0x80FFFFFF // Semi-transparent white
+		);
+	}
+
 
 	// Handle mouse scrolling
 	public static boolean handleMouseScroll(double scrollDelta) {

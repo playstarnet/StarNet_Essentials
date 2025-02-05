@@ -1,5 +1,7 @@
 package com.playstarnet.essentials;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.playstarnet.essentials.feat.api.API;
 import com.playstarnet.essentials.feat.config.StarNetPlusConfig;
 import com.playstarnet.essentials.feat.config.model.GeneralConfigModel;
@@ -8,7 +10,6 @@ import com.playstarnet.essentials.feat.keyboard.HPKeybinds;
 import com.playstarnet.essentials.feat.lifecycle.Lifecycle;
 import com.playstarnet.essentials.feat.lifecycle.Task;
 import com.playstarnet.essentials.feat.location.Location;
-import com.playstarnet.essentials.feat.sound.SoundManager;
 import com.playstarnet.essentials.util.Constants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -17,6 +18,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,6 +40,7 @@ public class StarNetEssentials implements ClientModInitializer {
 	private static boolean updateChecked = false;
 	private static boolean soundCached = false;
 	private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
+	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
 	@Override
 	public void onInitializeClient() {
@@ -83,7 +87,7 @@ public class StarNetEssentials implements ClientModInitializer {
 				.add(Task.of(API::modTeam, 50));
 
 		// Initialize the SoundManager
-		SoundManager.initialize();
+		//SoundManager.initialize();
 	}
 
 	private void handleDiscordLifecycle() {
@@ -112,11 +116,11 @@ public class StarNetEssentials implements ClientModInitializer {
 				// Offload update check and sound caching to background thread
 				backgroundExecutor.submit(() -> {
 					ModrinthUpdateChecker.checkForUpdates();
-					if (!soundCached) {
-						logger().info("Caching sound from server resource pack.");
-						SoundManager.playSoundWithCooldown();
-						soundCached = true;
-					}
+//                    if (!soundCached) {
+//                        logger().info("Caching sound from server resource pack.");
+//                        SoundManager.playSoundWithCooldown();
+//                        soundCached = true;
+//                    }
 				});
 
 				updateChecked = true;

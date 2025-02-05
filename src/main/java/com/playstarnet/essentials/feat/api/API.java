@@ -8,12 +8,21 @@ public class API {
     public static boolean living = false;
     public static boolean checkingUser = false;
     public static String API_KEY = "";
+    private static long lastPlayerListCall = 0;
+    private static final long PLAYER_LIST_COOLDOWN = 5000; // 5 seconds
 
     public static void tick() {
         if (!enabled || serverUnreachable) return;
         if (living || !API_KEY.isEmpty()) return;
-        if (!checkingUser) { QueryURL.asyncCreateUser(StarNetEssentials.player().getStringUUID(), StarNetEssentials.player().getName().getString()); checkingUser = true; }
-        QueryURL.asyncPlayerList();
+        long currentTime = System.currentTimeMillis();
+        if (!checkingUser) {
+            QueryURL.asyncCreateUser(StarNetEssentials.player().getStringUUID(), StarNetEssentials.player().getName().getString());
+            checkingUser = true;
+        }
+        if (currentTime - lastPlayerListCall > PLAYER_LIST_COOLDOWN) {
+            QueryURL.asyncPlayerList();
+            lastPlayerListCall = currentTime;
+        }
         QueryURL.asyncTeam();
     }
 

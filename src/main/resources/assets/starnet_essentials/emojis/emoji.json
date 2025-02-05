@@ -25,6 +25,7 @@
   { "name": "camera", "displayChar": "ꔶ" },
   { "name": "camera_with_flash", "displayChar": "ꔷ" },
   { "name": "football", "displayChar": "ꔹ" },
+  { "name": "paint_palette", "displayChar": "ꔵ" },
   { "name": "paint_brush", "displayChar": "ꔻ" },
   { "name": "blue_paint_brush", "displayChar": "ꔸ" },
   { "name": "yellow_paint_brush", "displayChar": "ꔺ" },

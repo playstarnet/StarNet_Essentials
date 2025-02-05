@@ -107,7 +107,7 @@ public class ConfigUI extends Screen {
 
                 rowHelper.addChild(Button.builder(label.copy().append(configModel.value ? "ON" : "OFF"), button -> {
                     configModel.value = !configModel.value;
-                    StarNetPlusConfig.write();
+                    StarNetPlusConfig.save(StarNetPlusConfig.createDefaultConfig()); // Save updated config
                     button.setMessage(label.copy().append(configModel.value ? "ON" : "OFF"));
                 }).build());
             }
