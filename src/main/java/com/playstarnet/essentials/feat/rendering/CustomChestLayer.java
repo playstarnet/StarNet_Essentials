@@ -4,57 +4,40 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.playstarnet.essentials.feat.config.model.GeneralConfigModel;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
-public class CustomChestLayer<T extends AbstractClientPlayer, M extends EntityModel<T>>
-        extends RenderLayer<T, M> {
+public class CustomChestLayer<T extends AbstractClientPlayer, M extends EntityModel<PlayerRenderState>>
+        extends RenderLayer<PlayerRenderState, M> {
 
     private final float scaleX;
     private final float scaleY;
     private final float scaleZ;
-    private final ItemInHandRenderer itemInHandRenderer;
+    private final ItemRenderer itemInHandRenderer;
+    private final BakedModel chestItemModel;
 
     private static final boolean HIDE_COSMETIC = GeneralConfigModel.HIDE_COSMETIC.value;
 
-    public CustomChestLayer(RenderLayerParent<T, M> renderer, EntityModelSet modelSet, ItemInHandRenderer itemInHandRenderer) {
-        this(renderer, modelSet, 1.0f, 1.0f, 1.0f, itemInHandRenderer);
+    public CustomChestLayer(RenderLayerParent<PlayerRenderState, M> renderer, ItemRenderer itemInHandRenderer, BakedModel chestItemModel) {
+        this(renderer, 1.0f, 1.0f, 1.0f, itemInHandRenderer, chestItemModel);
     }
 
-    public CustomChestLayer(RenderLayerParent<T, M> renderer, EntityModelSet modelSet, float scaleX, float scaleY, float scaleZ, ItemInHandRenderer itemInHandRenderer) {
+    public CustomChestLayer(RenderLayerParent<PlayerRenderState, M> renderer, float scaleX, float scaleY, float scaleZ,
+                            ItemRenderer itemInHandRenderer, BakedModel chestItemModel) {
         super(renderer);
         this.scaleX = scaleX;
         this.scaleY = scaleY;
         this.scaleZ = scaleZ;
         this.itemInHandRenderer = itemInHandRenderer;
-    }
-
-    @Override
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, T player, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (GeneralConfigModel.HIDE_COSMETIC.value) return;
-
-        ItemStack chestArmor = player.getItemBySlot(EquipmentSlot.CHEST);
-        if (chestArmor.isEmpty()) return;
-
-        poseStack.pushPose();
-
-        // Apply scaling
-        poseStack.scale(this.scaleX, this.scaleY, this.scaleZ);
-
-        // Apply body transformations
-        translateToBody(poseStack, player.isCrouching());
-
-        // Render the item
-        this.itemInHandRenderer.renderItem(player, chestArmor, ItemDisplayContext.HEAD, false, poseStack, buffer, packedLight);
-
-        poseStack.popPose();
+        this.chestItemModel = chestItemModel;
     }
 
     public static void translateToBody(PoseStack poseStack, boolean crouching) {
@@ -73,5 +56,26 @@ public class CustomChestLayer<T extends AbstractClientPlayer, M extends EntityMo
         // Scale and position adjustment
         poseStack.scale(0.625f, -0.625f, -0.625f);
         poseStack.translate(0.0D, 3, 0.0D);
+    }
+
+    @Override
+    public void render(PoseStack matrices, MultiBufferSource vertexConsumers, int light, PlayerRenderState entityRenderState, float limbAngle, float limbDistance) {
+        if (GeneralConfigModel.HIDE_COSMETIC.value) return;
+
+        ItemStack chestArmor = entityRenderState.chestItem;
+        if (chestArmor.isEmpty()) return;
+
+        matrices.pushPose();
+
+        // Apply scaling
+        matrices.scale(this.scaleX, this.scaleY, this.scaleZ);
+
+        // Apply body transformations
+        translateToBody(matrices, entityRenderState.isCrouching);
+
+        // Render the item
+        this.itemInHandRenderer.render(chestArmor, ItemDisplayContext.HEAD, false, matrices, vertexConsumers, light, OverlayTexture.NO_OVERLAY, chestItemModel);
+
+        matrices.popPose();
     }
 }

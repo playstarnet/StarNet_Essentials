@@ -38,9 +38,9 @@ dependencies {
     }
     modImplementation libs.fabric.loader
 
-    modImplementation("net.fabricmc.fabric-api:fabric-api:0.104.0+1.21.1")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:0.114.0+1.21.3")
 
-    modImplementation ("com.terraformersmc:modmenu:11.0.2")
+    modImplementation ("com.terraformersmc:modmenu:12.0.0")
 
     implementation include('org.json:json:20220320')
     include(implementation("com.github.CuteNyami:DiscordIPC-Buttons:main"))
