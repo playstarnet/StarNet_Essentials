@@ -16,13 +16,17 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class QueryURL {
+    private static final AtomicLong lastPingTime = new AtomicLong(0);
+    private static final long PING_COOLDOWN_MS = 1000; // 1 second cooldown
     private static final PoolingHttpClientConnectionManager CONNECTION_MANAGER =
             new PoolingHttpClientConnectionManager();
     private static final CloseableHttpClient HTTP_CLIENT =
             HttpClients.custom().setConnectionManager(CONNECTION_MANAGER).build();
     private static final URL API_URL;
+
     static {
         try {
             API_URL = new URL("http://api.blueninjar.com/api/");
@@ -32,10 +36,17 @@ public class QueryURL {
     }
 
     public static void asyncLifePing(String playerUUID, String apiCode) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastPingTime.get() < PING_COOLDOWN_MS) {
+            return; // Skip if within cooldown
+        }
+        lastPingTime.set(currentTime);
+
         CompletableFuture.runAsync(() -> {
             try {
                 HttpGet request = new HttpGet(API_URL + "live/" + playerUUID + "/" + apiCode);
-                request.addHeader(Constants.MOD_NAME + " v" + Constants.VERSION, StarNetEssentials.client().player.getName().getString());
+                addPlayerHeader(request);
+
                 try (CloseableHttpResponse response = HTTP_CLIENT.execute(request)) {
                     if (response.getStatusLine().getStatusCode() == 200) {
                         String jsonContent = EntityUtils.toString(response.getEntity());
@@ -43,37 +54,10 @@ public class QueryURL {
                         if (jsonObject.has("success")) {
                             API.living = true;
                         }
-                    } else if (response.getStatusLine().getStatusCode() == 400) {
-                        String jsonContent = EntityUtils.toString(response.getEntity());
-                        JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-                        if (jsonObject.has("error")) {
-                            switch (jsonObject.get("message").getAsString()) {
-                                case "User not alive" -> {
-                                    API.living = false;
-                                    API.API_KEY = "";
-                                    API.checkingUser = false;
-                                }
-                                case "Invalid UUID or code" -> {
-                                    StarNetEssentials.logger().error("API Error: " + jsonObject.get("message").getAsString());
-                                    API.living = false;
-                                    API.API_KEY = "";
-                                    API.checkingUser = false;
-                                }
-                            }
-                        }
                     }
                 }
-            } catch (IOException | ParseException | JsonSyntaxException e) {
-                API.living = false;
-                API.API_KEY = "";
-                if (e instanceof IOException) {
-                    StarNetEssentials.logger().error("API Error: " + e.getMessage() + "\n"
-                            + "Checking back in 30 seconds..." + "\n"
-                            + "Error area: asyncLifePing");
-                    API.serverUnreachable = true;
-                } else {
-                    e.printStackTrace();
-                }
+            } catch (Exception e) {
+                StarNetEssentials.logger().error("Error in asyncLifePing: ", e);
             }
         });
     }
@@ -82,42 +66,32 @@ public class QueryURL {
         CompletableFuture.runAsync(() -> {
             try {
                 HttpGet request = new HttpGet(API_URL + "create/" + playerUUID + "/" + userName);
-                request.addHeader(Constants.MOD_NAME + " v" + Constants.VERSION, StarNetEssentials.client().player.getName().getString());
+                addPlayerHeader(request);
+
                 try (CloseableHttpResponse response = HTTP_CLIENT.execute(request)) {
-                    if (response.getStatusLine().getStatusCode() == 200) {
-                        String jsonContent = EntityUtils.toString(response.getEntity());
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    String jsonContent = EntityUtils.toString(response.getEntity());
+
+                    if (statusCode == 200) {
                         JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                         if (jsonObject.has("code")) {
                             API.API_KEY = jsonObject.get("code").getAsString();
                             API.living = true;
                         }
-                    } else if (response.getStatusLine().getStatusCode() == 400) {
-                        String jsonContent = EntityUtils.toString(response.getEntity());
+                    } else if (statusCode == 400) {
                         JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                         if (jsonObject.has("error")) {
                             API.checkingUser = false;
-                            switch (jsonObject.get("message").getAsString()) {
-                                case "User already exists", "Invalid UUID or code" -> {
-                                    API.living = true;
-                                    StarNetEssentials.logger().error("API Error: " + jsonObject.get("message").getAsString());
-                                }
+                            String errorMessage = jsonObject.get("message").getAsString();
+                            if (errorMessage.equals("User already exists") || errorMessage.equals("Invalid UUID or code")) {
+                                API.living = true;
+                                StarNetEssentials.logger().error("API Error: " + errorMessage);
                             }
                         }
                     }
                 }
             } catch (IOException | ParseException | JsonSyntaxException e) {
-                if (e instanceof IOException) {
-                    StarNetEssentials.logger().error("API Error: " + e.getMessage() + "\n"
-                    + "Checking back in 30 seconds..." + "\n"
-                    + "Error area: asyncCreateUser");
-                    API.serverUnreachable = true;
-                    API.living = false;
-                    API.checkingUser = false;
-                } else {
-                    API.living = false;
-                    API.checkingUser = false;
-                    e.printStackTrace();
-                }
+                handleAPIError(e, "asyncCreateUser");
             }
         });
     }
@@ -126,7 +100,8 @@ public class QueryURL {
         CompletableFuture.runAsync(() -> {
             try {
                 HttpGet request = new HttpGet(API_URL + "end/" + playerUUID + "/" + apiCode);
-                request.addHeader(Constants.MOD_NAME + " v" + Constants.VERSION, StarNetEssentials.client().player.getName().getString());
+                addPlayerHeader(request);
+
                 try (CloseableHttpResponse response = HTTP_CLIENT.execute(request)) {
                     if (response.getStatusLine().getStatusCode() == 200) {
                         String jsonContent = EntityUtils.toString(response.getEntity());
@@ -137,14 +112,7 @@ public class QueryURL {
                     }
                 }
             } catch (IOException | ParseException | JsonSyntaxException e) {
-                if (e instanceof IOException) {
-                    StarNetEssentials.logger().error("API Error: " + e.getMessage() + "\n"
-                            + "Checking back in 30 seconds..." + "\n"
-                            + "Error area: asyncDestroy");
-                    API.serverUnreachable = true;
-                } else {
-                    e.printStackTrace();
-                }
+                handleAPIError(e, "asyncDestroy");
             }
         });
     }
@@ -153,11 +121,11 @@ public class QueryURL {
         CompletableFuture.runAsync(() -> {
             try {
                 HttpGet request = new HttpGet(API_URL + "users/");
-                request.addHeader(Constants.MOD_NAME + " v" + Constants.VERSION, StarNetEssentials.client().player.getName().getString());
+                addPlayerHeader(request);
+
                 try (CloseableHttpResponse response = HTTP_CLIENT.execute(request)) {
                     if (response.getStatusLine().getStatusCode() == 200) {
                         String jsonContent = EntityUtils.toString(response.getEntity());
-
                         JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
                         JsonArray jsonElements = jsonObject.get("users").getAsJsonArray();
 
@@ -173,14 +141,7 @@ public class QueryURL {
                     }
                 }
             } catch (IOException | ParseException | JsonSyntaxException e) {
-                if (e instanceof IOException) {
-                    StarNetEssentials.logger().error("API Error: " + e.getMessage() + "\n"
-                            + "Checking back in 30 seconds..." + "\n"
-                            + "Error area: asyncPlayerList");
-                    API.serverUnreachable = true;
-                } else {
-                    e.printStackTrace();
-                }
+                handleAPIError(e, "asyncPlayerList");
             }
         });
     }
@@ -189,44 +150,49 @@ public class QueryURL {
         CompletableFuture.runAsync(() -> {
             try {
                 HttpGet request = new HttpGet(API_URL + "users/team");
-                request.addHeader(Constants.MOD_NAME + " v" + Constants.VERSION, StarNetEssentials.client().player.getName().getString());
+                addPlayerHeader(request);
+
                 try (CloseableHttpResponse response = HTTP_CLIENT.execute(request)) {
                     if (response.getStatusLine().getStatusCode() == 200) {
                         String jsonContent = EntityUtils.toString(response.getEntity());
-
                         JsonObject jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject();
-                        JsonObject jsonTeamObj = jsonObject.get("team").getAsJsonObject();
-                        JsonObject teamObj = jsonTeamObj.get("team").getAsJsonObject();
-                        JsonArray translatorArray = teamObj.get("translator").getAsJsonArray();
-                        JsonArray teamArray = teamObj.get("team").getAsJsonArray();
-                        JsonArray devArray = teamObj.get("dev").getAsJsonArray();
-                        
-                        for (int i = 0; i < translatorArray.size(); i++) {
-                            if (StaticValues.translators.contains(translatorArray.get(i).getAsString())) continue;
-                            StaticValues.translators.add(translatorArray.get(i).getAsString());
-                        }
+                        JsonObject jsonTeamObj = jsonObject.getAsJsonObject("team");
+                        JsonObject teamObj = jsonTeamObj.getAsJsonObject("team");
 
-                        for (int i = 0; i < teamArray.size(); i++) {
-                            if (StaticValues.teamMembers.contains(teamArray.get(i).getAsString())) continue;
-                            StaticValues.teamMembers.add(teamArray.get(i).getAsString());
-                        }
-
-                        for (int i = 0; i < devArray.size(); i++) {
-                            if (StaticValues.devs.contains(devArray.get(i).getAsString())) continue;
-                            StaticValues.devs.add(devArray.get(i).getAsString());
-                        }
+                        addToList(StaticValues.translators, teamObj.getAsJsonArray("translator"));
+                        addToList(StaticValues.teamMembers, teamObj.getAsJsonArray("team"));
+                        addToList(StaticValues.devs, teamObj.getAsJsonArray("dev"));
                     }
                 }
             } catch (IOException | ParseException | JsonSyntaxException e) {
-                if (e instanceof IOException) {
-                    StarNetEssentials.logger().error("API Error: " + e.getMessage() + "\n"
-                            + "Checking back in 30 seconds..." + "\n"
-                            + "Error area: asyncTeam");
-                    API.serverUnreachable = true;
-                } else {
-                    e.printStackTrace();
-                }
+                handleAPIError(e, "asyncTeam");
             }
         });
+    }
+
+    private static void addPlayerHeader(HttpGet request) {
+        if (StarNetEssentials.client().player != null) {
+            request.addHeader(Constants.MOD_NAME + " v" + Constants.VERSION,
+                    StarNetEssentials.client().player.getName().getString());
+        }
+    }
+
+    private static void handleAPIError(Exception e, String methodName) {
+        if (e instanceof IOException) {
+            StarNetEssentials.logger().error("API Error in " + methodName + ": " + e.getMessage() +
+                    "\nChecking back in 30 seconds...");
+            API.serverUnreachable = true;
+        } else {
+            StarNetEssentials.logger().error("API Exception in " + methodName + ": ", e);
+        }
+    }
+
+    private static void addToList(java.util.List<String> list, JsonArray jsonArray) {
+        for (JsonElement element : jsonArray) {
+            String value = element.getAsString();
+            if (!list.contains(value)) {
+                list.add(value);
+            }
+        }
     }
 }

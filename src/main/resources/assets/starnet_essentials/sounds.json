@@ -2,7 +2,7 @@
   "interface_click": {
     "sounds": [
       {
-        "name": "starnet_essentials:interface_click"
+        "name": "starnet_essentials:click1"
       }
     ]
   }

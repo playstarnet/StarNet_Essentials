@@ -18,11 +18,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.Entity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,17 +33,17 @@ public class StarNetEssentials implements ClientModInitializer {
 	private static final StarNetPlusConfig CONFIG = new StarNetPlusConfig();
 	private static Location LOCATION = Location.UNKNOWN;
 	private static Lifecycle LIFECYCLE;
-	private static final HPKeybinds KEYBINDS = new HPKeybinds();
 	private static final boolean debugMode = false;
 	private static boolean updateChecked = false;
 	private static boolean soundCached = false;
 	private static final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
 	private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+	private static final File LOG_FILE = new File("./starnet_riding_log.txt");
 
 	@Override
 	public void onInitializeClient() {
 		Constants.MOD_MENU_PRESENT = FabricLoader.getInstance().isModLoaded("modmenu");
-
+		new HPKeybinds();
 		LIFECYCLE = new Lifecycle();
 
 		// Discord Manager initialization with error handling
@@ -66,7 +64,6 @@ public class StarNetEssentials implements ClientModInitializer {
 				}, 0))
 				.add(Task.of(Location::check, 200))
 				.add(Task.of(this::handleDiscordLifecycle, 10))
-				.add(Task.of(this::handleKeybinds, 10))
 				.add(Task.of(() -> {
 					if (StarNetEssentials.connected()) {
 						API.enabled = true;
@@ -85,9 +82,6 @@ public class StarNetEssentials implements ClientModInitializer {
 					}
 				}, 100))
 				.add(Task.of(API::modTeam, 50));
-
-		// Initialize the SoundManager
-		//SoundManager.initialize();
 	}
 
 	private void handleDiscordLifecycle() {
@@ -100,35 +94,31 @@ public class StarNetEssentials implements ClientModInitializer {
 		}
 	}
 
-	private void handleKeybinds() {
-		if (connected()) {
-			KEYBINDS.tick();
-		}
-	}
-
 	public static boolean connected() {
 		ServerData server = Minecraft.getInstance().getCurrentServer();
 		if (server != null) {
 			boolean isConnected = server.ip.toLowerCase().endsWith("playstarnet.com") && !server.ip.toLowerCase().contains("event");
-			if (isConnected && !updateChecked) {
-				logger().info("Performing Modrinth update check.");
 
-				// Offload update check and sound caching to background thread
-				backgroundExecutor.submit(() -> {
-					ModrinthUpdateChecker.checkForUpdates();
-//                    if (!soundCached) {
-//                        logger().info("Caching sound from server resource pack.");
-//                        SoundManager.playSoundWithCooldown();
-//                        soundCached = true;
-//                    }
-				});
+			if (isConnected) {
+				if (!updateChecked) {
+					logger().info("Performing Modrinth update check.");
 
-				updateChecked = true;
+					// Offload update check to background thread
+					backgroundExecutor.submit(ModrinthUpdateChecker::checkForUpdates);
+
+					updateChecked = true; // Mark as checked for this session
+				}
+			} else {
+				// Reset when disconnecting or switching servers
+				updateChecked = false;
+				ModrinthUpdateChecker.resetCheck();
 			}
+
 			return isConnected;
 		} else {
+			// Reset when completely disconnected
 			updateChecked = false;
-			soundCached = false;
+			ModrinthUpdateChecker.resetCheck();
 			return false;
 		}
 	}

@@ -22,8 +22,10 @@ public abstract class CustomHeadLayerMixin<T extends LivingEntity, M extends Ent
         super(renderer);
     }
 
-    @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At("HEAD"), cancellable = true)
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, T livingEntity, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci) {
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, T livingEntity,
+                       float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks,
+                       float netHeadYaw, float headPitch, CallbackInfo ci) {
         if (StarNetEssentials.connected() && GeneralConfigModel.HIDE_COSMETIC.value) {
             ci.cancel();
         }
